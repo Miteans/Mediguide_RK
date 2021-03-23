@@ -12,16 +12,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.carousel_activity);
 
-        carousel_button = (Button) findViewById(R.id.carousel_button);
-        carousel_button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                openCarouselActivity();
-            }
-        });
-
+        openCarouselActivity();
     }
 
     public void openCarouselActivity(){

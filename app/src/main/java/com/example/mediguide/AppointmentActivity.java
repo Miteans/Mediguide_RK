@@ -1,7 +1,7 @@
 package com.example.mediguide;
-
 import android.app.Activity;
 import android.app.DatePickerDialog;
+import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
@@ -49,9 +49,7 @@ public class AppointmentActivity extends Activity {
         });
 
 
-//        time = (TextInputEditText) findViewById(R.id.time_text1);
-//        firstTimePicker = (TimePicker) findViewById(R.id.time_text1);
-//        firstTimePicker.setIs24HourView(false);
+        time = (TextInputEditText) findViewById(R.id.time_text1);
 
         eTextLayout=(TextInputEditText) findViewById(R.id.date_text1);
         eTextLayout.setOnClickListener(new View.OnClickListener() {
@@ -73,14 +71,24 @@ public class AppointmentActivity extends Activity {
             }
         });
 
-//        firstTimePicker.setOnTimeChangedListener(new TimePicker.OnTimeChangedListener() {
-//            @Override
-//            public void onTimeChanged(TimePicker view, int hourOfDay, int minute) {
-//                // display a toast with changed values of time picker
-//                Toast.makeText(getApplicationContext(), hourOfDay + " " + minute, Toast.LENGTH_SHORT).show();
-//                time.setText( hourOfDay + " : " + minute);
-//            }
-//        });
+        time.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // TODO Auto-generated method stub
+                Calendar mcurrentTime = Calendar.getInstance();
+                int hour = mcurrentTime.get(Calendar.HOUR_OF_DAY);
+                int minute = mcurrentTime.get(Calendar.MINUTE);
+                TimePickerDialog mTimePicker;
+                mTimePicker = new TimePickerDialog(AppointmentActivity.this, new TimePickerDialog.OnTimeSetListener() {
+                    @Override
+                    public void onTimeSet(TimePicker timePicker, int selectedHour, int selectedMinute) {
+                        time.setText( selectedHour + ":" + selectedMinute);
+                    }
+                }, hour, minute, true);//Yes 24 hour time
+                mTimePicker.setTitle("Select Time");
+                mTimePicker.show();
+            }
+        });
 
     }
 }
