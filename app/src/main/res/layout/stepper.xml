@@ -10,6 +10,7 @@
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toTopOf="parent"
+    android:gravity="center"
     android:padding="20dp">
 
     <View
@@ -20,7 +21,7 @@
 
     <View
         android:id="@+id/line_one"
-        android:layout_width="80dp"
+        android:layout_width="95dp"
         android:layout_height="25dp"
         android:layout_toEndOf="@+id/circle_one"
         android:background="@drawable/ic_baseline_horizontal_rule_24" />
@@ -34,7 +35,7 @@
 
     <View
         android:id="@+id/line_two"
-        android:layout_width="80dp"
+        android:layout_width="95dp"
         android:layout_height="25dp"
         android:layout_toEndOf="@+id/circle_two"
         android:background="@drawable/ic_baseline_horizontal_rule_24" />
@@ -46,25 +47,12 @@
         android:layout_toEndOf="@+id/line_two"
         android:background="@drawable/ic_baseline_radio_button_unchecked_24" />
 
-    <View
-        android:id="@+id/line_three"
-        android:layout_width="80dp"
-        android:layout_height="25dp"
-        android:layout_toEndOf="@+id/circle_three"
-        android:background="@drawable/ic_baseline_horizontal_rule_24" />
-
-    <View
-        android:id="@+id/circle_four"
-        android:layout_width="25dp"
-        android:layout_height="25dp"
-        android:layout_toEndOf="@+id/line_three"
-        android:background="@drawable/ic_baseline_radio_button_unchecked_24" />
-
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/circle_one"
         android:text="Detail"
+        android:textAlignment="center"
         android:textColor="#dbdbdb" />
 
     <TextView
@@ -73,6 +61,7 @@
         android:layout_below="@+id/circle_two"
         android:layout_toEndOf="@id/line_one"
         android:text="Time"
+        android:textAlignment="center"
         android:textColor="#dbdbdb" />
 
     <TextView
@@ -81,14 +70,7 @@
         android:layout_below="@+id/circle_three"
         android:layout_toEndOf="@id/line_two"
         android:text="Instruction"
-        android:textColor="#dbdbdb" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/circle_four"
-        android:layout_toEndOf="@id/line_three"
-        android:text="Done"
+        android:textAlignment="center"
         android:textColor="#dbdbdb" />
 
 </RelativeLayout>

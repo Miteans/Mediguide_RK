@@ -15,4 +15,5 @@
     <color name="secondary">#D7EDE2</color>
     <color name="primary_light">#056FAC</color>
     <color name="colorAccent">#041871</color>
+    <color name="transparent">#00ff0000</color>
 </resources>

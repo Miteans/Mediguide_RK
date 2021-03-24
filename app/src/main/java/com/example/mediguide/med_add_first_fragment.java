@@ -12,6 +12,8 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import android.provider.MediaStore;
 import android.view.LayoutInflater;
@@ -103,6 +105,16 @@ public class med_add_first_fragment extends Fragment {
                 startActivityForResult(intent, 100);
             }
         });
+
+        Button btn = view.findViewById(R.id.second_fragment);
+
+        btn.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                final Fragment second = new med_add_second_fragment();
+                initiaseFragment(second);
+            }
+        });
+
         return view;
     }
 
@@ -113,5 +125,13 @@ public class med_add_first_fragment extends Fragment {
             imageView.setImageBitmap(captureImage);
 
         }
+    }
+
+    public void initiaseFragment(Fragment fragment){
+        FragmentManager fm = getParentFragmentManager();
+        FragmentTransaction fragmentTransaction = fm.beginTransaction();
+        fragmentTransaction.replace(R.id.fragment, fragment);
+        fragmentTransaction.addToBackStack(null);
+        fragmentTransaction.commit();
     }
 }

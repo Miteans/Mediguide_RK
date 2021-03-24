@@ -16,6 +16,7 @@ import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.Calendar;
 
+
 /**
  * A simple {@link Fragment} subclass.
  * Use the {@link med_add_third_fragment#newInstance} factory method to
@@ -31,7 +32,6 @@ public class med_add_third_fragment extends Fragment {
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
-
     DatePickerDialog picker;
     TextInputEditText eTextLayout;
 
