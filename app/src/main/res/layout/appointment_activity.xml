@@ -52,6 +52,7 @@
                 android:layout_marginRight="30dp"
                 android:hint="@string/appointment_title">
                 <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/title_text"
                     android:layout_width="332dp"
                     android:layout_height="wrap_content" />
             </com.google.android.material.textfield.TextInputLayout>
@@ -66,6 +67,7 @@
                 android:layout_marginRight="30dp"
                 android:hint="@string/hospital_name">
                 <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/hospital_name_text"
                     android:layout_width="332dp" android:layout_height="wrap_content" />
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -79,6 +81,7 @@
                 android:layout_marginRight="30dp"
                 android:hint="@string/doctor_name">
                 <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/doctor_name_text"
                     android:layout_width="332dp"
                     android:layout_height="wrap_content" />
             </com.google.android.material.textfield.TextInputLayout>
@@ -96,7 +99,7 @@
                     android:layout_marginRight="30dp">
 
                     <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/date_text1"
+                        android:id="@+id/date_text"
                         android:layout_width="157dp"
                         android:layout_height="wrap_content"
                         android:hint="@string/select_date" />
@@ -112,7 +115,7 @@
                     android:layout_marginRight="0dp">
 
                     <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/time_text1"
+                        android:id="@+id/time_text"
                         android:layout_width="157dp"
                         android:layout_height="wrap_content"
                         android:hint="@string/select_time" />

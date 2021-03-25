@@ -118,11 +118,11 @@ public class SignUpActivity extends Activity {
             Toast.makeText(getApplicationContext(), "Successfull", Toast.LENGTH_SHORT).show();
         }
 
-        // Check for a cinfirmation of password.
+        // Check for a confirmation of password.
         if (confirm_password.getText().toString().isEmpty()) {
             confirm_password.setError(getResources().getString(R.string.confirm_password_error));
             isConfirmPasswordValid = false;
-        } else if (confirm_password.getText() != password.getText()) {
+        } else if (!(confirm_password.getText().toString().equals(password.getText().toString()))) {
             confirm_password.setError(getResources().getString(R.string.error_password_not_confirmed));
             isConfirmPasswordValid = false;
         } else  {

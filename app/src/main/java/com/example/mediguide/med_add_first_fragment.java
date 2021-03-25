@@ -19,6 +19,7 @@ import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
@@ -43,6 +44,7 @@ public class med_add_first_fragment extends Fragment {
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
+    private String formOfMedicine;
     ImageView imageView;
     Button camera;
 
@@ -115,12 +117,29 @@ public class med_add_first_fragment extends Fragment {
             }
         });
 
+        TextInputLayout dosage = (TextInputLayout) view.findViewById(R.id.dosage);
+
+        autoCompleteTextView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                formOfMedicine = (String) adapterView.getItemAtPosition(i);
+                if(formOfMedicine=="Pill"){
+                    dosage.setHelperText("Enter number of pills");
+                }
+                else if(formOfMedicine=="Drops"){
+                    dosage.setHelperText("Enter number of drops");
+                }
+
+            }
+        });
+
         return view;
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data){
         if (requestCode == 100){
+            imageView.setVisibility(View.VISIBLE);
             Bitmap captureImage = (Bitmap) data.getExtras().get("data");
             imageView.setImageBitmap(captureImage);
 
