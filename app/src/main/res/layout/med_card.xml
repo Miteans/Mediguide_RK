@@ -1,0 +1,492 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app = "http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:clipChildren="false"
+    android:clipToPadding="false"
+    android:padding="10dp">
+
+    <com.ramotion.foldingcell.FoldingCell
+    android:id="@+id/folding_cell"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    app:animationDuration="1000"
+    app:backSideColor="@color/primary"
+    app:additionalFlipsCount="2"
+    app:cameraHeight="30"
+    >
+
+    <FrameLayout
+        android:id="@+id/cell_content_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/card_border"
+        android:visibility="gone"
+        >
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            >
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:layout_width="160dp"
+                    android:layout_height="120dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginTop="10dp"
+                    android:id="@+id/imageView"
+                    android:background="@drawable/card_border"/>
+
+                <RelativeLayout
+                    android:layout_width="wrap_content"
+                    android:layout_marginLeft="170dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="10dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp">
+
+                    <TextView
+                        android:id="@+id/card_content_Title1"
+                        android:layout_width="match_parent"
+                        android:layout_height="35dp"
+                        android:paddingStart="10dp"
+                        android:text="Aspirin"
+                        android:textColor="@color/primary"
+                        android:textSize="20dp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/card_content_Title2"
+                        android:layout_width="match_parent"
+                        android:layout_height="35dp"
+                        android:layout_below="@+id/card_content_Title1"
+                        android:paddingStart="10dp"
+                        android:text="Dosage : 1"
+                        android:textColor="@color/primary"
+                        android:textSize="17dp" />
+
+                    <TextView
+                        android:id="@+id/card_content_Title3"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingBottom="7dp"
+                        android:layout_below="@+id/card_content_Title2"
+                        android:paddingStart="10dp"
+                        android:text="Instruction : Take the medicine after eating"
+                        android:textColor="@color/primary"
+                        android:textSize="17dp" />
+
+                </RelativeLayout>
+
+            </RelativeLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/primary"
+                />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginLeft="10dp">
+
+                <TextView
+                    android:layout_width="190dp"
+                    android:layout_height="wrap_content"
+                    android:text="Reason for Intake"
+                    android:textSize="17dp"
+                    android:paddingStart="10dp"
+                    android:textColor="@color/primary"
+
+                    />
+                <TextView
+                    android:layout_width="190dp"
+                    android:layout_height="wrap_content"
+                    android:paddingStart="10dp"
+                    android:textSize="17dp"
+                    android:textColor="@color/primary"
+                    android:text="Medicine Form"/>
+
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="10dp"
+                >
+
+                <TextView
+                    android:layout_width="190dp"
+                    android:layout_height="wrap_content"
+                    android:text="HeadAche"
+                    android:textSize="15dp"
+                    android:paddingStart="15dp"
+                    android:textColor="@color/primary"
+                    />
+
+                <TextView
+                    android:layout_width="190dp"
+                    android:layout_height="wrap_content"
+                    android:text="Pill"
+                    android:textSize="15dp"
+                    android:paddingStart="15dp"
+                    android:textColor="@color/primary"
+                    />
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/primary"
+                />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginLeft="10dp">
+
+                <TextView
+                    android:layout_width="190dp"
+                    android:layout_height="wrap_content"
+                    android:text="Start of medicine intake"
+                    android:textSize="17dp"
+                    android:paddingStart="10dp"
+                    android:textColor="@color/primary"
+
+                    />
+                <TextView
+                    android:layout_width="190dp"
+                    android:layout_height="wrap_content"
+                    android:paddingStart="10dp"
+                    android:textSize="17dp"
+                    android:textColor="@color/primary"
+                    android:text="Duration for medicine intake"/>
+
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="10dp"
+                >
+
+                <TextView
+                    android:layout_width="190dp"
+                    android:layout_height="wrap_content"
+                    android:text="21-05-2020"
+                    android:textSize="15dp"
+                    android:paddingStart="15dp"
+                    android:textColor="@color/primary"
+                    />
+
+                <TextView
+                    android:layout_width="190dp"
+                    android:layout_height="wrap_content"
+                    android:text="50 Days"
+                    android:textSize="15dp"
+                    android:paddingStart="15dp"
+                    android:textColor="@color/primary"
+                    />
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/primary"
+                />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginLeft="10dp">
+
+                <TextView
+                    android:layout_width="190dp"
+                    android:layout_height="wrap_content"
+                    android:text="Is it a daily medication ?"
+                    android:textSize="17dp"
+                    android:paddingStart="10dp"
+                    android:textColor="@color/primary"
+
+                    />
+                <TextView
+                    android:layout_width="190dp"
+                    android:layout_height="wrap_content"
+                    android:paddingStart="10dp"
+                    android:textSize="17dp"
+                    android:textColor="@color/primary"
+                    android:text="Other instruction for medicine intake"/>
+
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="10dp"
+                >
+
+                <TextView
+                    android:layout_width="190dp"
+                    android:layout_height="wrap_content"
+                    android:text="Yes"
+                    android:textSize="15dp"
+                    android:paddingStart="15dp"
+                    android:textColor="@color/primary"
+                    />
+
+                <TextView
+                    android:layout_width="190dp"
+                    android:layout_height="wrap_content"
+                    android:text="Not available"
+                    android:textSize="15dp"
+                    android:paddingStart="15dp"
+                    android:textColor="@color/primary"
+                    />
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/primary"
+                />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginLeft="10dp">
+
+                <TextView
+                    android:layout_width="380dp"
+                    android:layout_height="wrap_content"
+                    android:text="Frequency of medicine intake"
+                    android:textSize="17dp"
+                    android:paddingStart="10dp"
+                    android:textColor="@color/primary"
+
+                    />
+
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="10dp"
+                >
+
+                <TextView
+                    android:layout_width="190dp"
+                    android:layout_height="wrap_content"
+                    android:text="3 Times a day"
+                    android:textSize="15dp"
+                    android:paddingStart="15dp"
+                    android:textColor="@color/primary"
+                    />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginRight="10dp"
+                android:layout_marginLeft="15dp"
+                android:layout_marginBottom="20dp"
+                >
+                <com.github.florent37.expansionpanel.ExpansionHeader
+                    android:layout_height="30dp"
+                    android:layout_width="match_parent"
+                    app:expansion_headerIndicator="@id/headerIndicator"
+                    app:expansion_layout="@id/expansionLayout"
+                    android:background="@color/card_bg"
+                    app:expansion_toggleOnClick="true">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="30dp"
+                        android:text="Intake times"
+                        android:layout_marginLeft="10dp"
+                        android:paddingTop="3dp"
+                        android:textColor="@color/primary"
+                        android:textSize="16dp"
+                        android:layout_marginRight="40dp"/>
+
+                    <ImageView
+                        android:adjustViewBounds="true"
+                        android:id="@+id/headerIndicator"
+                        android:layout_gravity="center_vertical|right"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="16dp"
+                        android:layout_width="wrap_content"
+                        app:srcCompat="@drawable/ic_expansion_header_indicator_grey_24dp" />
+
+
+                </com.github.florent37.expansionpanel.ExpansionHeader>
+
+                <com.github.florent37.expansionpanel.ExpansionLayout
+                    android:id="@+id/expansionLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+                        <TextView
+                            android:id="@+id/intake1"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="10dp"
+                            android:layout_marginTop="10dp"
+                            android:text="11:45"
+                            android:textColor="@color/primary" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="10dp"
+                            android:layout_marginTop="35dp"
+                            android:text="16:45"
+                            android:textColor="@color/primary" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="10dp"
+                            android:layout_marginTop="60dp"
+                            android:text="21:45"
+                            android:textColor="@color/primary" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="10dp"
+                            android:layout_marginTop="85dp"
+                            android:text="21:45"
+                            android:textColor="@color/primary" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="10dp"
+                            android:layout_marginTop="110dp"
+                            android:text="21:45"
+                            android:textColor="@color/primary" />
+
+
+                    </LinearLayout>
+
+                </com.github.florent37.expansionpanel.ExpansionLayout>
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/cell_title_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="3dp"
+        android:background="@drawable/card_border">
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            >
+
+            <TextView
+                android:id="@+id/medNum"
+                android:layout_width="100dp"
+                android:layout_height="150dp"
+                android:background="@color/primary"
+                android:gravity="center"
+                android:text="1"
+                android:textColor="@color/white"
+                android:textSize="30dp" />
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_marginLeft="100dp"
+                android:layout_height="wrap_content"
+                android:background="@color/white">
+
+                <TextView
+                    android:id="@+id/card_Title1"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:paddingStart="20dp"
+                    android:paddingTop="7dp"
+                    android:text="Medicine Name"
+                    android:textColor="@color/primary"
+                    android:textSize="23dp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/card_Title2"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:layout_below="@+id/card_Title1"
+                    android:paddingStart="20dp"
+                    android:paddingTop="7dp"
+                    android:text="Dosage : "
+                    android:textColor="@color/primary"
+                    android:textSize="20dp" />
+
+                <TextView
+                    android:id="@+id/card_Title3"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:layout_below="@+id/card_Title2"
+                    android:paddingStart="20dp"
+                    android:paddingTop="7dp"
+                    android:text="Instruction : "
+                    android:textColor="@color/primary"
+                    android:textSize="20dp" />
+
+            </RelativeLayout>
+
+        </RelativeLayout>
+
+
+    </FrameLayout>
+
+</com.ramotion.foldingcell.FoldingCell>
+
+</LinearLayout>

@@ -7,8 +7,10 @@ public class Appointment {
     private String appointment_title;
     private String hospital_name;
     private String doctor_name;
-    private Date date;
-    private Date time;
+    private String date;
+    private String time;
+    private boolean isReminderSet;
+    private String userId;
 
     public Appointment() {
     }
@@ -25,6 +27,14 @@ public class Appointment {
         return hospital_name;
     }
 
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
     public void setHospital_name(String hospital_name) {
         this.hospital_name = hospital_name;
     }
@@ -37,19 +47,27 @@ public class Appointment {
         this.doctor_name = doctor_name;
     }
 
-    public Date getDate() {
+    public String getDate() {
         return date;
     }
 
-    public void setDate(Date date) {
+    public void setDate(String date) {
         this.date = date;
     }
 
-    public Date getTime() {
+    public String getTime() {
         return time;
     }
 
-    public void setTime(Date time) {
+    public void setTime(String time) {
         this.time = time;
+    }
+
+    public boolean getIsReminderSet() {
+        return isReminderSet;
+    }
+
+    public void setIsReminderSet(boolean isReminderSet) {
+        this.isReminderSet = isReminderSet;
     }
 }

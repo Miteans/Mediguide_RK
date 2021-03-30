@@ -38,5 +38,8 @@
     <string name="logout">Logout</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="required">This field is required</string>
     <string name="med_not_found">No medication details found!</string>
+    <string name="appointment_not_found">No appointment details found!</string>
+
 </resources>

@@ -9,6 +9,7 @@ import android.text.InputType;
 import android.util.Patterns;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -19,8 +20,11 @@ import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 
 import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -39,13 +43,10 @@ public class AppointmentActivity extends Activity {
     Button appointment_form;
     boolean isTitleValid, isDateValid, isTimeValid;
     DatePickerDialog picker;
-    TextInputEditText eTextLayout;
-    TextView time;
-    TimePicker firstTimePicker;
+    SwitchMaterial set_reminder;
 
     DatabaseReference reference;
     Appointment appointment;
-    long maxid = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,55 +63,38 @@ public class AppointmentActivity extends Activity {
         appointment = new Appointment();
         reference = FirebaseDatabase.getInstance().getReference().child("Appointment");
 
-        reference.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if(dataSnapshot.exists())
-                    maxid = (dataSnapshot.getChildrenCount());
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-
         appointment_form.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
                 if(SetValidation()){
-                    try{
-                        String str1 = appointment_date.getText().toString();
-                        DateFormat format1 = new SimpleDateFormat("dd/MM/yyyy");
-                        Date date = format1.parse(str1);
+                    String title_name = title.getText().toString();
+                    String hospital_name = hospital.getText().toString();
+                    String doctor_name = doctor.getText().toString();
+                    String appointmentDate = appointment_date.getText().toString();
+                    String appointmentTime = appointment_time.getText().toString();
+                    set_reminder = (SwitchMaterial) findViewById(R.id.set_reminder);
 
-                        String str2 = appointment_time.getText().toString();
-                        String str3 = str2 + ":00";
-                        DateFormat format2 = new SimpleDateFormat("HH:mm:ss");
-                        Date time = format2.parse(str3);
+                    appointment.setAppointment_title(title_name);
+                    appointment.setHospital_name(hospital_name);
+                    appointment.setDoctor_name(doctor_name);
+                    appointment.setDate(appointmentDate);
+                    appointment.setTime(appointmentTime);
+                    if(set_reminder.isChecked())
+                        appointment.setIsReminderSet(true);
+                    else
+                        appointment.setIsReminderSet(false);
 
-                        String title_name = title.getText().toString();
-                        String hospital_name = hospital.getText().toString();
-                        String doctor_name = doctor.getText().toString();
-                        Date get_date = date;
-                        Date get_time = time;
+                    //User Id set up
+                    FirebaseUser currentFirebaseUser = FirebaseAuth.getInstance().getCurrentUser() ;
+                    String userId = currentFirebaseUser.getUid();
+                    appointment.setUserId(userId);
 
-                        appointment.setAppointment_title(title_name);
-                        appointment.setHospital_name(hospital_name);
-                        appointment.setDoctor_name(doctor_name);
-                        appointment.setDate(get_date);
-                        appointment.setTime(get_time);
-
-                    }
-                    catch (Exception e) {
-                        System.out.println(e);
-                    }
-
-                    reference.child(String.valueOf(maxid+1)).setValue(appointment);
+                    reference.push().setValue(appointment);
 
                     Toast.makeText(AppointmentActivity.this, "Saved successfully", Toast.LENGTH_LONG).show();
 
+                    clearForm();
                 }
             }
         });
@@ -158,7 +142,7 @@ public class AppointmentActivity extends Activity {
                     public void onTimeSet(TimePicker timePicker, int selectedHour, int selectedMinute) {
                         appointment_time.setText( selectedHour + ":" + selectedMinute);
                     }
-                }, hour, minute, true);//Yes 24 hour time
+                }, hour, minute, false);//Yes 24 hour time
                 mTimePicker.setTitle("Select Time");
                 mTimePicker.show();
             }
@@ -194,6 +178,12 @@ public class AppointmentActivity extends Activity {
             return true;
         }
         return false;
+    }
+
+    public void clearForm(){
+        finish();
+        Intent intent = new Intent(AppointmentActivity.this, AppointmentActivity.class);
+        startActivity(intent);
     }
 
 }

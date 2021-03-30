@@ -1,6 +1,7 @@
 package com.example.mediguide;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -10,24 +11,31 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-public class SignUpActivity extends Activity {
+public class SignUpActivity extends Activity{
     EditText name, email, phone, password, confirm_password;
     Button register;
     boolean isNameValid, isEmailValid, isPhoneValid, isPasswordValid, isConfirmPasswordValid;
     DatabaseReference reference;
     User user;
     long maxid = 0;
+    FirebaseAuth mFirebaseAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.sign_up_activity);
+
+        mFirebaseAuth=FirebaseAuth.getInstance();
 
         name = (EditText) findViewById(R.id.PersonName);
         email = (EditText) findViewById(R.id.inputEmail);
@@ -38,18 +46,6 @@ public class SignUpActivity extends Activity {
         user = new User();
         reference = FirebaseDatabase.getInstance().getReference().child("User");
 
-        reference.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if(dataSnapshot.exists())
-                    maxid = (dataSnapshot.getChildrenCount());
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
 
         register.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -61,15 +57,27 @@ public class SignUpActivity extends Activity {
                     Long userPhone = Long.parseLong((phone.getText().toString().trim()));
                     String userPassword = password.getText().toString();
 
+                    //storing in authentication
+                    mFirebaseAuth.createUserWithEmailAndPassword(userEmail,userPassword).addOnCompleteListener(SignUpActivity.this, new OnCompleteListener<AuthResult>() {
+                        @Override
+                        public void onComplete(@NonNull Task<AuthResult> task) {
+                            if(!task.isSuccessful()){
+                                Toast.makeText(SignUpActivity.this, "Registration Unsuccessful", Toast.LENGTH_LONG).show();
+                            }
+                            else{
+                                startActivity(new Intent(SignUpActivity.this,HomeActivity.class));
+                                Toast.makeText(SignUpActivity.this, "Registered successfully", Toast.LENGTH_LONG).show();
+                            }
+                        }
+                    });
+
+                    //storing data in Real Time DB
                     user.setName(userName);
                     user.setEmail(userEmail);
                     user.setPhoneNumber(userPhone);
                     user.setPassword(userPassword);
 
-                    reference.child(String.valueOf(maxid+1)).setValue(user);
-
-                    Toast.makeText(SignUpActivity.this, "Registered successfully", Toast.LENGTH_LONG).show();
-
+                    reference.push().setValue(user);
                 }
             }
         });
@@ -114,18 +122,16 @@ public class SignUpActivity extends Activity {
             isPasswordValid = true;
         }
 
-        if (isNameValid && isEmailValid && isPhoneValid && isPasswordValid) {
-            Toast.makeText(getApplicationContext(), "Successfull", Toast.LENGTH_SHORT).show();
-        }
-
         // Check for a confirmation of password.
         if (confirm_password.getText().toString().isEmpty()) {
             confirm_password.setError(getResources().getString(R.string.confirm_password_error));
             isConfirmPasswordValid = false;
-        } else if (!(confirm_password.getText().toString().equals(password.getText().toString()))) {
+        }
+        else if (!(confirm_password.getText().toString().equals(password.getText().toString()))) {
             confirm_password.setError(getResources().getString(R.string.error_password_not_confirmed));
             isConfirmPasswordValid = false;
-        } else  {
+        }
+        else  {
             isConfirmPasswordValid = true;
         }
 
@@ -134,6 +140,4 @@ public class SignUpActivity extends Activity {
         }
         return false;
     }
-
-
 }

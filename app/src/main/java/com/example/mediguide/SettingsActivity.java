@@ -5,7 +5,6 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
@@ -13,6 +12,7 @@ import android.widget.Toast;
 
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.firebase.auth.FirebaseAuth;
 
 public class SettingsActivity extends Activity {
     TextView log_out,changepswrd;
@@ -27,6 +27,8 @@ public class SettingsActivity extends Activity {
         old_pass = (TextInputEditText) findViewById(R.id.oldpass);
         newpass1 = (TextInputEditText) findViewById(R.id.newpass1);
         newpass2 = (TextInputEditText) findViewById(R.id.newpass2);
+
+        FirebaseAuth mFirebaseAuth = FirebaseAuth.getInstance();
 
         MaterialToolbar mToolbar = (MaterialToolbar) findViewById(R.id.topAppBarSetting);
         mToolbar.setNavigationIcon(R.drawable.ic_baseline_arrow_back_24);
@@ -48,7 +50,10 @@ public class SettingsActivity extends Activity {
                         .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
+                                mFirebaseAuth.signOut();
+                                System.out.println(mFirebaseAuth.getCurrentUser());
                                 openLoginActivity();
+                                finish();
                             }
                         })
                         .setNegativeButton("Cancel",null);

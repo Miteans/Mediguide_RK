@@ -3,6 +3,7 @@
     package="com.example.mediguide">
 
     <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.BLUETOOTH"/>
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
 
@@ -13,7 +14,6 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Mediguide">
-<!--        <activity android:name=".SettingActivity"></activity>-->
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -29,6 +29,10 @@
         <activity android:name=".AppointmentActivity" />
         <activity android:name=".SettingsActivity" />
         <activity android:name=".MedAddActivity" />
+        <activity android:name=".MedicationActivity"/>
+        <activity android:name=".AppointmentCardActivity"/>
+        <activity android:name=".Dummy"/>
+
     </application>
 
 </manifest>

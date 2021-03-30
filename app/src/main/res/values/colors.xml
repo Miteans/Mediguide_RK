@@ -16,4 +16,5 @@
     <color name="primary_light">#056FAC</color>
     <color name="colorAccent">#041871</color>
     <color name="transparent">#00ff0000</color>
+    <color name="card_bg">#9ABACC</color>
 </resources>
