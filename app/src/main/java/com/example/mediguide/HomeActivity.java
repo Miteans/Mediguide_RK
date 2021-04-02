@@ -1,21 +1,26 @@
 package com.example.mediguide;
+
+import android.app.AlarmManager;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
-
-import android.graphics.drawable.Drawable;
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -24,58 +29,75 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
+import com.squareup.picasso.Picasso;
 
+import java.text.SimpleDateFormat;
+
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.Calendar;
 
 public class HomeActivity extends AppCompatActivity {
-    MaterialToolbar mToolbar;
     DatabaseReference reference;
     ArrayList<MedicineInformation> retrieveMedDetails;
     private RecyclerView recyclerView;
-    //    private MedicationAdapter medicationAdapter;
-
+    private HomeAdapter homeAdapter;
+    private ImageView imageView;
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.home_activity);
 
+        MaterialToolbar toolbar = (MaterialToolbar) findViewById(R.id.topAppBar);
+        setSupportActionBar(toolbar);
+        toolbar.setTitle("MediGuide");
+
+        /*createNotificationChannel();
+
+        Intent intent = new Intent(HomeActivity.this, ReminderBroadcast.class);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0,intent, 0);
+        AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+        alarmManager.set(AlarmManager.RTC_WAKEUP, 20000, pendingIntent);*/
+
+
         reference = FirebaseDatabase.getInstance().getReference().child("MedicineInformation");
         FirebaseAuth mFirebaseAuth = FirebaseAuth.getInstance();
         FirebaseUser mFirebaseUser=mFirebaseAuth.getCurrentUser();
 
+        imageView = findViewById(R.id.image_view);
+        try {
+            Picasso.with(this)
+                    .load(R.drawable.calendar1)
+                    /*.placeholder(R.drawable.placeholder) //optional*/
+                    .resize(350, 260)         //optional
+                    /*.centerCrop()       */                 //optional
+                    .into(imageView);
+        }
+        catch (Exception e){}
+
         reference.orderByChild("userId").equalTo(mFirebaseUser.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+            @RequiresApi(api = Build.VERSION_CODES.O)
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 int i = 0;
                 if(dataSnapshot.exists()){
                     retrieveMedDetails = new ArrayList<MedicineInformation>();
                     for(DataSnapshot snapshot : dataSnapshot.getChildren() ){
-                        MedicineInformation dummy = new MedicineInformation();
-                        dummy.setMedicineName(snapshot.child("medicineName").getValue().toString());
-                        dummy.setFormOfMedicine(snapshot.child("formOfMedicine").getValue().toString());
-                        dummy.setDosage(Integer.parseInt(snapshot.child("dosage").getValue().toString()));
-                        dummy.setReasonForIntake(snapshot.child("reasonForIntake").getValue().toString());
-                        dummy.setEverydayMed((boolean) snapshot.child("everydayMed").getValue(Boolean.class));
-                        dummy.setFrequencyOfMedIntake(Integer.parseInt(snapshot.child("frequencyOfMedIntake").getValue().toString()));
-
-                        GenericTypeIndicator<List<String>> genericTypeIndicator = new GenericTypeIndicator<List<String>>() {};
-                        dummy.setIntakeTimes(snapshot.child("intakeTimes").getValue(genericTypeIndicator));
-
-                        dummy.setImageUrl(snapshot.child("imageUrl").getValue().toString());
-                        dummy.setInstruction(snapshot.child("instruction").getValue().toString());
-                        dummy.setDuration(Integer.parseInt(snapshot.child("duration").getValue().toString()));
-                        dummy.setRefillCount(Integer.parseInt(snapshot.child("refillCount").getValue().toString()));
-                        dummy.setSetStartDate(snapshot.child("setStartDate").getValue().toString());
-                        dummy.setOtherInstruction(snapshot.child("otherInstruction").getValue().toString());
-
-                        retrieveMedDetails.add(dummy);
-                        //setUpMedicineCards();
-//                        printData(retrieveMedDetails);
-                        Date currentTime = Calendar.getInstance().getTime();
-                        System.out.println(currentTime);
+                        //Daily Medication
+                        if(snapshot.child("everydayMed").getValue(Boolean.class)){
+                            if(checkTheDate(snapshot.child("setStartDate").getValue().toString(), snapshot.child("duration").getValue().toString())){
+                                retrieveDataFromDatabase(snapshot);
+                            }
+                        }
+                        //Not a daily Medication
+                        else{
+                            if(checkNoDate(snapshot)){
+                                retrieveDataFromDatabase(snapshot);
+                            }
+                        }
                     }
                 }
             }
@@ -85,10 +107,6 @@ public class HomeActivity extends AppCompatActivity {
         });
 
 
-
-        MaterialToolbar toolbar = (MaterialToolbar) findViewById(R.id.topAppBar);
-        setSupportActionBar(toolbar);
-        toolbar.setTitle("MediGuide");
 
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -133,7 +151,7 @@ public class HomeActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.appointment:
                 //add the function to perform here
-                openAppointmentCardActivity();
+                openAppointmentActivity();
                 break;
             case R.id.refill:
                 //add the function to perform here
@@ -162,7 +180,7 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     public void openConnectActivity(){
-        Intent intent = new Intent(this, Dummy.class);
+        Intent intent = new Intent(this, MedicationActivity.class);
         startActivity(intent);
     }
 
@@ -176,8 +194,8 @@ public class HomeActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    public void openAppointmentCardActivity(){
-        Intent intent = new Intent(this, AppointmentCardActivity.class);
+    public void openAppointmentActivity(){
+        Intent intent = new Intent(this, AppointmentActivity.class);
         startActivity(intent);
     }
 
@@ -185,4 +203,103 @@ public class HomeActivity extends AppCompatActivity {
         Intent intent = new Intent(this, SettingsActivity.class);
         startActivity(intent);
     }
+
+    private void setUpMedicineCards() {
+        recyclerView = findViewById(R.id.recyclerView);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        recyclerView.setLayoutManager(linearLayoutManager);
+        recyclerView.setFocusable(false);
+
+        homeAdapter = new HomeAdapter(this);
+        recyclerView.setAdapter(homeAdapter);
+
+        homeAdapter.setDataToMedicationAdapter(retrieveMedDetails);
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    private boolean checkTheDate(String medDateString, String medDuration){
+        Date currentDate = new Date();
+        Date medDate = currentDate;
+        Date endDate = currentDate;
+        SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
+        Calendar c = Calendar.getInstance();
+        try{
+            medDate = format.parse(medDateString);
+            c.setTime(format.parse(medDateString));
+        }
+        catch (Exception e){
+        }
+
+        c.add(Calendar.DAY_OF_MONTH, Integer.parseInt(medDuration));
+
+        try{
+            endDate = format.parse(format.format(c.getTime()));
+        }
+        catch (Exception e){}
+
+        return (medDate.compareTo(currentDate) * currentDate.compareTo(endDate) >= 0);
+    }
+
+    private boolean checkNoDate(DataSnapshot snapshot){
+        Date currentDate = new Date();
+        Date medDate = currentDate;
+        Date endDate = currentDate;
+        SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
+        Calendar c = Calendar.getInstance();
+
+        try {
+            medDate = format.parse(snapshot.child("setStartDate").getValue().toString());
+            c.setTime(medDate);
+            c.add(Calendar.DAY_OF_MONTH, Integer.parseInt(snapshot.child("duration").getValue().toString()));
+            endDate = format.parse(format.format(c.getTime()));
+
+            c = Calendar.getInstance();
+            c.setTime(medDate);
+
+            while ((format.parse(format.format(c.getTime())).after(medDate) ||
+                    format.parse(format.format(c.getTime())).equals(medDate))
+                    && (format.parse(format.format(c.getTime())).before(endDate) ||
+                    format.parse(format.format(c.getTime())).equals(endDate))){
+
+                if(format.parse(format.format(c.getTime())).equals(currentDate)){
+                    return true;
+                }
+
+                else if(format.parse(format.format(c.getTime())).after(currentDate)){
+                    return false;
+                }
+
+                c.add(Calendar.DAY_OF_MONTH, Integer.parseInt(snapshot.child("noMedIntake").getValue().toString()));
+            }
+        }
+        catch (Exception e){ }
+        return false;
+    }
+
+    private void retrieveDataFromDatabase(DataSnapshot snapshot){
+        MedicineInformation dummy = new MedicineInformation();
+        dummy.setMedicineName(snapshot.child("medicineName").getValue().toString());
+        dummy.setDosage(Integer.parseInt(snapshot.child("dosage").getValue().toString()));
+        dummy.setFrequencyOfMedIntake(Integer.parseInt(snapshot.child("frequencyOfMedIntake").getValue().toString()));
+
+        GenericTypeIndicator<List<String>> genericTypeIndicator = new GenericTypeIndicator<List<String>>() {};
+        dummy.setIntakeTimes(snapshot.child("intakeTimes").getValue(genericTypeIndicator));
+
+        dummy.setImageUrl(snapshot.child("imageUrl").getValue().toString());
+
+        retrieveMedDetails.add(dummy);
+        setUpMedicineCards();
+    }
+
+    /*@RequiresApi(api = Build.VERSION_CODES.O)
+    private void createNotificationChannel(){
+        CharSequence name  = "cghhfjknl";
+        String description = "hchvkhnlkmkln";
+        int importance = NotificationManager.IMPORTANCE_DEFAULT;
+        NotificationChannel channel = new NotificationChannel("NotifyMedIntake", name, importance);
+        channel.setDescription(description);
+
+        NotificationManager notificationManager = getSystemService(NotificationManager.class);
+        notificationManager.createNotificationChannel(channel);
+    }*/
 }

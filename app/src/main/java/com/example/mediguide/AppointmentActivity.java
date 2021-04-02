@@ -1,189 +1,127 @@
 package com.example.mediguide;
-import android.app.Activity;
-import android.app.DatePickerDialog;
-import android.app.TimePickerDialog;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
-import android.text.InputType;
-import android.util.Patterns;
 import android.view.View;
-import android.widget.Button;
-import android.widget.CompoundButton;
-import android.widget.DatePicker;
-import android.widget.EditText;
-import android.widget.TextView;
-import android.widget.TimePicker;
-import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import android.graphics.drawable.Drawable;
+import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.appbar.MaterialToolbar;
-import com.google.android.material.switchmaterial.SwitchMaterial;
-import com.google.android.material.textfield.TextInputEditText;
-import com.google.android.material.textfield.TextInputLayout;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
+import com.squareup.picasso.Picasso;
 
-import java.sql.Time;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.SimpleTimeZone;
+import java.util.ArrayList;
+import java.util.List;
 
-public class AppointmentActivity extends Activity {
-    TextInputEditText title, hospital, doctor, appointment_date, appointment_time;
-    Button appointment_form;
-    boolean isTitleValid, isDateValid, isTimeValid;
-    DatePickerDialog picker;
-    SwitchMaterial set_reminder;
 
+public class AppointmentActivity extends AppCompatActivity {
+    MaterialToolbar mToolbar;
     DatabaseReference reference;
-    Appointment appointment;
+    private ImageView imageView;
+    ArrayList<Appointment> retrieveAppointmentDetails;
+    private RecyclerView recyclerView;
+    private AppointmentAdapter appointmentAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.appointment_activity);
 
-        title = (TextInputEditText) findViewById(R.id.title_text);
-        hospital = (TextInputEditText) findViewById(R.id.hospital_name_text);
-        doctor = (TextInputEditText) findViewById(R.id.doctor_name_text);
-        appointment_date = (TextInputEditText) findViewById(R.id.date_text);
-        appointment_time = (TextInputEditText) findViewById(R.id.time_text);
-        appointment_form = (Button) findViewById(R.id.apt_btn);
-
-        appointment = new Appointment();
-        reference = FirebaseDatabase.getInstance().getReference().child("Appointment");
-
-        appointment_form.setOnClickListener(new View.OnClickListener() {
+        FloatingActionButton fab = findViewById(R.id.fab1);
+        fab.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
-
-                if(SetValidation()){
-                    String title_name = title.getText().toString();
-                    String hospital_name = hospital.getText().toString();
-                    String doctor_name = doctor.getText().toString();
-                    String appointmentDate = appointment_date.getText().toString();
-                    String appointmentTime = appointment_time.getText().toString();
-                    set_reminder = (SwitchMaterial) findViewById(R.id.set_reminder);
-
-                    appointment.setAppointment_title(title_name);
-                    appointment.setHospital_name(hospital_name);
-                    appointment.setDoctor_name(doctor_name);
-                    appointment.setDate(appointmentDate);
-                    appointment.setTime(appointmentTime);
-                    if(set_reminder.isChecked())
-                        appointment.setIsReminderSet(true);
-                    else
-                        appointment.setIsReminderSet(false);
-
-                    //User Id set up
-                    FirebaseUser currentFirebaseUser = FirebaseAuth.getInstance().getCurrentUser() ;
-                    String userId = currentFirebaseUser.getUid();
-                    appointment.setUserId(userId);
-
-                    reference.push().setValue(appointment);
-
-                    Toast.makeText(AppointmentActivity.this, "Saved successfully", Toast.LENGTH_LONG).show();
-
-                    clearForm();
-                }
+            public void onClick(View view) {
+                openAppointmentForm();
             }
         });
 
-        MaterialToolbar mToolbar = (MaterialToolbar) findViewById(R.id.topAppBar);
+
+        reference = FirebaseDatabase.getInstance().getReference().child("Appointment");
+
+        FirebaseAuth mFirebaseAuth = FirebaseAuth.getInstance();
+        FirebaseUser mFirebaseUser=mFirebaseAuth.getCurrentUser();
+
+        imageView = findViewById(R.id.image_view);
+        try {
+            Picasso.with(this)
+                    .load(R.drawable.calendar)
+                    /*.placeholder(R.drawable.placeholder) //optional*/
+                    .resize(350, 260)         //optional
+                    /*.centerCrop()       */                 //optional
+                    .into(imageView);
+        }
+        catch (Exception e){}
+
+
+        reference.orderByChild("userId").equalTo(mFirebaseUser.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                int i = 0;
+                if (dataSnapshot.exists()) {
+                    retrieveAppointmentDetails = new ArrayList<Appointment>();
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        Appointment dummy = new Appointment();
+                        dummy.setAppointment_title(snapshot.child("appointment_title").getValue().toString());
+                        dummy.setDoctor_name(snapshot.child("doctor_name").getValue().toString());
+                        dummy.setHospital_name(snapshot.child("hospital_name").getValue().toString());
+                        dummy.setDate(snapshot.child("date").getValue().toString());
+                        dummy.setTime(snapshot.child("time").getValue().toString());
+
+                        retrieveAppointmentDetails.add(dummy);
+                        setUpAppointmentCards();
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+        //Back Button(To Home)
+        mToolbar = (MaterialToolbar) findViewById(R.id.topAppBar1);
         mToolbar.setNavigationIcon(R.drawable.ic_baseline_arrow_back_24);
         mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(AppointmentActivity.this,HomeActivity.class);
+                Intent intent = new Intent(AppointmentActivity.this, HomeActivity.class);
                 startActivity(intent);
                 finish();
             }
         });
 
-        appointment_date.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                final Calendar cldr = Calendar.getInstance();
-                int day = cldr.get(Calendar.DAY_OF_MONTH);
-                int month = cldr.get(Calendar.MONTH);
-                int year = cldr.get(Calendar.YEAR);
-                // date picker dialog
-                picker = new DatePickerDialog(AppointmentActivity.this,
-                        new DatePickerDialog.OnDateSetListener() {
-                            @Override
-                            public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-                                appointment_date.setText(dayOfMonth + "/" + (monthOfYear + 1) + "/" + year);
-                            }
-                        }, year, month, day);
-                picker.show();
-            }
-        });
-
-        appointment_time.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // TODO Auto-generated method stub
-                Calendar mcurrentTime = Calendar.getInstance();
-                int hour = mcurrentTime.get(Calendar.HOUR_OF_DAY);
-                int minute = mcurrentTime.get(Calendar.MINUTE);
-                TimePickerDialog mTimePicker;
-                mTimePicker = new TimePickerDialog(AppointmentActivity.this, new TimePickerDialog.OnTimeSetListener() {
-                    @Override
-                    public void onTimeSet(TimePicker timePicker, int selectedHour, int selectedMinute) {
-                        appointment_time.setText( selectedHour + ":" + selectedMinute);
-                    }
-                }, hour, minute, false);//Yes 24 hour time
-                mTimePicker.setTitle("Select Time");
-                mTimePicker.show();
-            }
-        });
 
     }
 
-    public Boolean SetValidation() {
-
-        if (title.getText().toString().isEmpty()) {
-            title.setError(getResources().getString(R.string.name_error));
-            isTitleValid = false;
-        } else  {
-            isTitleValid = true;
-        }
-
-        if (appointment_date.getText().toString().isEmpty()) {
-            appointment_date.setError(getResources().getString(R.string.email_error));
-            isDateValid = false;
-        } else  {
-            isDateValid = true;
-        }
-
-        if (appointment_time.getText().toString().isEmpty()) {
-            appointment_time.setError(getResources().getString(R.string.phone_error));
-            isTimeValid = false;
-        } else  {
-            isTimeValid = true;
-        }
-
-
-        if (isTitleValid && isDateValid && isTimeValid) {
-            return true;
-        }
-        return false;
-    }
-
-    public void clearForm(){
-        finish();
-        Intent intent = new Intent(AppointmentActivity.this, AppointmentActivity.class);
+    public void openAppointmentForm() {
+        Intent intent = new Intent(this, com.example.mediguide.AppointmentForm.class);
         startActivity(intent);
     }
 
+    private void setUpAppointmentCards() {
+        recyclerView = findViewById(R.id.recyclerView);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        recyclerView.setLayoutManager(linearLayoutManager);
+        recyclerView.setFocusable(false);
+        appointmentAdapter = new AppointmentAdapter(this);
+        recyclerView.setAdapter(appointmentAdapter);
+        appointmentAdapter.setDataToAppointmentAdapter(retrieveAppointmentDetails);
+    }
 }

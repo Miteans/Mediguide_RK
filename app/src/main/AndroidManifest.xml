@@ -30,8 +30,8 @@
         <activity android:name=".SettingsActivity" />
         <activity android:name=".MedAddActivity" />
         <activity android:name=".MedicationActivity"/>
-        <activity android:name=".AppointmentCardActivity"/>
-        <activity android:name=".Dummy"/>
+        <activity android:name=".AppointmentForm"/>
+        <receiver android:name=".ReminderBroadcast"/>
 
     </application>
 

@@ -1,60 +1,91 @@
-//package com.example.mediguide;
-//
-//import android.content.Context;
-//import android.view.LayoutInflater;
-//import android.view.View;
-//import android.view.ViewGroup;
-//import android.widget.TextView;
-//import androidx.annotation.NonNull;
-//import androidx.recyclerview.widget.RecyclerView;
-//import java.util.ArrayList;
-//public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.HomeViewHolder>{
-//    private Context context;
-//    private ArrayList<MedicineInformation> todayMedicines;
-//    public HomeAdapter(Context context){
-//        this.context = context;
-//    }
-//    public void setDataToMedicationAdapter(ArrayList<MedicineInformation> list){
-//        todayMedicines = list;
-//        notifyDataSetChanged();
-//    }
-//    @NonNull
-//    @Override
-//    public HomeAdapter.HomeViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-//        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.home_card,parent,false);
-//        return new HomeAdapter.HomeViewHolder(view);
-//    }
-//    @Override
-//    public void onBindViewHolder(@NonNull HomeAdapter.HomeViewHolder holder, int position) {
-//        MedicineInformation medicine = todayMedicines.get(position);
-//        holder.medicineName.setText(medicine.getMedicineName());
-//        holder.reasonForIntake.setText(medicine.getReasonForIntake());
-//        holder.dosage.setText(medicine.getDosage());
-//        holder.frequencyOfMedIntake.setText(medicine.getFrequencyOfMedIntake());
-//        holder.otherInstruction.setText(medicine.getOtherInstruction());
-//        holder.formOfMedicine.setText(medicine.getFormOfMedicine());
-//        holder.instruction.setText(medicine.getInstruction());
-//    }
-//    @Override
-//    public int getItemCount() {
-//        return todayMedicines.size();
-//    }
-//    public class HomeViewHolder extends RecyclerView.ViewHolder{
-//        private TextView medicineName, reasonForIntake, dosage,frequencyOfMedIntake, intakeTimes[];
-//        private TextView otherInstruction, formOfMedicine, instruction;
-//        public HomeViewHolder(@NonNull View homeView){
-//            super(homeView);
-//            medicineName = homeView.findViewById(R.id.medicineName);
-//            reasonForIntake = homeView.findViewById(R.id.reasonForIntake);
-//            dosage = homeView.findViewById(R.id.dosageMed);
-//            frequencyOfMedIntake = homeView.findViewById(R.id.freqOfMedIntake);
-//            otherInstruction = homeView.findViewById(R.id.otherInstructionMed);
-//            formOfMedicine =homeView.findViewById(R.id.formOfMedicine);
-//            instruction = homeView.findViewById(R.id.instructionMed);
-//        }
-//    }
-//}
-//
-//public class HomeAdapter{
-//
-//}
+package com.example.mediguide;
+
+import android.content.Context;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.squareup.picasso.Picasso;
+
+import java.util.ArrayList;
+
+public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.HomeViewHolder>{
+    private Context context;
+    private ArrayList<MedicineInformation> todayMedicines;
+
+    public HomeAdapter(Context context){
+        this.context = context;
+    }
+
+    public void setDataToMedicationAdapter(ArrayList<MedicineInformation> list){
+        todayMedicines = list;
+        notifyDataSetChanged();
+    }
+
+    @NonNull
+    @Override
+    public HomeAdapter.HomeViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.home_card,parent,false);
+        return new HomeAdapter.HomeViewHolder(view);
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull HomeAdapter.HomeViewHolder holder, int position) {
+        MedicineInformation medicine = todayMedicines.get(position);
+        System.out.println();
+        holder.medicineName.setText(medicine.getMedicineName());
+        holder.dosage.setText("Dosage : " + medicine.getDosage());
+        holder.frequencyOfMedIntake.setText("Frequency of medicine intake : " + medicine.getFrequencyOfMedIntake());
+        try {
+            Picasso.with(context)
+                    .load(medicine.getImageUrl())
+                    /*.placeholder(R.drawable.placeholder) //optional*/
+                    .resize(158, 108)         //optional
+                    /*.centerCrop()       */                 //optional
+                    .into(holder.imageView);
+        }
+        catch (Exception e){}
+
+        for(String msg: medicine.getIntakeTimes()){
+            holder.intakeTimes.addView(createTextView(msg));
+        }
+
+    }
+
+    private TextView createTextView(String msg){
+        TextView textView = new TextView(context);
+        textView.setPadding(5, 0, 5, 0);
+        textView.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT));
+        textView.setTextColor(context.getResources().getColor(R.color.primary));
+        textView.setTextSize(15);
+        textView.setText(msg);
+        return textView;
+    }
+
+    @Override
+    public int getItemCount() {
+        return todayMedicines.size();
+    }
+
+    public class HomeViewHolder extends RecyclerView.ViewHolder{
+        private TextView medicineName, dosage,frequencyOfMedIntake;
+        private ImageView imageView;
+        private LinearLayout intakeTimes;
+
+        public HomeViewHolder(@NonNull View homeView){
+            super(homeView);
+
+            medicineName = homeView.findViewById(R.id.medicineName);
+            dosage = homeView.findViewById(R.id.dosage);
+            frequencyOfMedIntake = homeView.findViewById(R.id.freqOfMedIntake);
+            imageView = homeView.findViewById(R.id.imageView);
+            intakeTimes = homeView.findViewById(R.id.intakeTimes);
+        }
+    }
+}

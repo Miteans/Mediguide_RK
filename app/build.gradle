@@ -46,4 +46,7 @@ dependencies {
     implementation 'com.ramotion.foldingcell:folding-cell:1.2.3'
     implementation 'androidx.recyclerview:recyclerview:1.1.0'
     implementation 'com.wajahatkarim3.EasyFlipView:EasyFlipView:3.0.0'
+    implementation 'com.github.gifffert:ExpandableTextView:0.1.6'
+    implementation 'androidx.cardview:cardview:1.0.0'
+    implementation 'com.github.mthli:Slice:v1.3'
 }

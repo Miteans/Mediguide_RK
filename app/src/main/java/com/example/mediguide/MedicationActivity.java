@@ -30,7 +30,7 @@ public class MedicationActivity extends AppCompatActivity {
     DatabaseReference reference;
     ArrayList<MedicineInformation> retrieveMedDetails;
     private RecyclerView recyclerView;
-    //private MedicationAdapter medicationAdapter;
+    private MedicationAdapter medicationAdapter;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,6 +53,11 @@ public class MedicationActivity extends AppCompatActivity {
                         dummy.setDosage(Integer.parseInt(snapshot.child("dosage").getValue().toString()));
                         dummy.setReasonForIntake(snapshot.child("reasonForIntake").getValue().toString());
                         dummy.setEverydayMed((boolean) snapshot.child("everydayMed").getValue(Boolean.class));
+
+                        if(!dummy.getEverydayMed()) {
+                            dummy.setNoMedIntake(Integer.parseInt(snapshot.child("noMedIntake").getValue().toString()));
+                        }
+
                         dummy.setFrequencyOfMedIntake(Integer.parseInt(snapshot.child("frequencyOfMedIntake").getValue().toString()));
 
                         GenericTypeIndicator<List<String>> genericTypeIndicator = new GenericTypeIndicator<List<String>>() {};
@@ -66,7 +71,7 @@ public class MedicationActivity extends AppCompatActivity {
                         dummy.setOtherInstruction(snapshot.child("otherInstruction").getValue().toString());
 
                         retrieveMedDetails.add(dummy);
-                        //setUpMedicineCards();
+                        setUpMedicineCards();
                         printData(retrieveMedDetails);
                     }
                 }
@@ -108,7 +113,7 @@ public class MedicationActivity extends AppCompatActivity {
         }
     }
 
-    /*private void setUpMedicineCards(){
+    private void setUpMedicineCards(){
         recyclerView = findViewById(R.id.recyclerView);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(linearLayoutManager);
@@ -118,5 +123,5 @@ public class MedicationActivity extends AppCompatActivity {
         recyclerView.setAdapter(medicationAdapter);
 
         medicationAdapter.setDataToMedicationAdapter(retrieveMedDetails);
-    }*/
+    }
 }
