@@ -27,7 +27,9 @@
         android:layout_height="300dp"
         android:layout_marginLeft="60dp"
         android:layout_marginTop="70dp"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:id="@+id/noData"
+        android:visibility="gone">
 
         <androidx.cardview.widget.CardView
             android:layout_marginLeft="50dp"
@@ -44,12 +46,48 @@
                 android:layout_height="wrap_content"
                 tools:ignore="ContentDescription" />
 
-
-
         </androidx.cardview.widget.CardView>
 
         <TextView
             android:id="@+id/med_not_added"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="25dp"
+            android:layout_marginTop="15dp"
+            android:gravity="center"
+            android:text="@string/appointment_not_found"
+            android:textColor="@color/black"
+            android:textSize="20dp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="300dp"
+        android:layout_height="300dp"
+        android:layout_marginLeft="60dp"
+        android:layout_marginTop="70dp"
+        android:orientation="vertical"
+        android:id="@+id/noTodayApp"
+        android:visibility="gone">
+
+        <androidx.cardview.widget.CardView
+            android:layout_marginLeft="50dp"
+            android:layout_marginTop="50dp"
+            app:cardCornerRadius="50dp"
+            app:cardElevation="0dp"
+            android:layout_width="190dp"
+            android:layout_height="150dp">
+
+            <ImageView
+                android:id="@+id/image_view1"
+                android:scaleType="centerCrop"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:ignore="ContentDescription" />
+
+        </androidx.cardview.widget.CardView>
+
+        <TextView
+            android:id="@+id/app_not_added"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="25dp"

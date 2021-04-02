@@ -50,7 +50,7 @@ public class SettingsActivity extends Activity {
                         .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                mFirebaseAuth.signOut();
+                                mFirebaseAuth.getInstance().signOut();
                                 System.out.println(mFirebaseAuth.getCurrentUser());
                                 openLoginActivity();
                                 finish();

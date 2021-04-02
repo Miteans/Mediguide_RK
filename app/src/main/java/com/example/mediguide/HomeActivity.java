@@ -4,19 +4,24 @@ import android.app.AlarmManager;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.ProgressDialog;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.github.jhonnyx2012.horizontalpicker.DatePickerListener;
+import com.github.jhonnyx2012.horizontalpicker.HorizontalPicker;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -31,6 +36,8 @@ import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
+import org.joda.time.DateTime;
+
 import java.text.SimpleDateFormat;
 
 import java.time.format.DateTimeFormatter;
@@ -44,7 +51,8 @@ public class HomeActivity extends AppCompatActivity {
     ArrayList<MedicineInformation> retrieveMedDetails;
     private RecyclerView recyclerView;
     private HomeAdapter homeAdapter;
-    private ImageView imageView;
+    private ImageView imageView,imageView1;
+    private LinearLayout noTodayMed,noData;
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,6 +62,46 @@ public class HomeActivity extends AppCompatActivity {
         MaterialToolbar toolbar = (MaterialToolbar) findViewById(R.id.topAppBar);
         setSupportActionBar(toolbar);
         toolbar.setTitle("MediGuide");
+
+        noTodayMed = findViewById(R.id.noTodayMed);
+        noData = findViewById(R.id.noData);
+        recyclerView = findViewById(R.id.recyclerView);
+
+        // find the picker
+        HorizontalPicker picker = (HorizontalPicker) findViewById(R.id.datePicker);
+        ProgressDialog nDialog;
+        nDialog = new ProgressDialog(HomeActivity.this);
+        nDialog.setMessage("Loading..");
+        nDialog.setTitle("Get Data");
+        nDialog.setIndeterminate(false);
+        nDialog.setCancelable(true);
+        nDialog.show();
+
+        DatePickerListener listener = new DatePickerListener() {
+            @Override
+            public void onDateSelected(DateTime dateSelected) {
+                System.out.println("Hello");
+            }
+        };
+
+        // initialize it and attach a listener
+        picker
+                .setListener(listener)
+                .setDays(20)
+                .setOffset(10)
+                .setDateSelectedColor(Color.DKGRAY)
+                .setDateSelectedTextColor(Color.WHITE)
+                .setMonthAndYearTextColor(Color.DKGRAY)
+                .setTodayButtonTextColor(getColor(R.color.colorPrimary))
+                .setTodayDateTextColor(getColor(R.color.colorPrimary))
+                .setTodayDateBackgroundColor(Color.GRAY)
+                .setUnselectedDayTextColor(Color.DKGRAY)
+                .setDayOfWeekTextColor(Color.DKGRAY)
+                .setUnselectedDayTextColor(getColor(R.color.primary))
+                .showTodayButton(false)
+                .init();
+
+        picker.setDate(new DateTime());
 
         /*createNotificationChannel();
 
@@ -78,6 +126,18 @@ public class HomeActivity extends AppCompatActivity {
         }
         catch (Exception e){}
 
+
+        imageView1 = findViewById(R.id.image_view1);
+        try {
+            Picasso.with(this)
+                    .load(R.drawable.calendar1)
+                    /*.placeholder(R.drawable.placeholder) //optional*/
+                    .resize(350, 260)         //optional
+                    /*.centerCrop()       */                 //optional
+                    .into(imageView1);
+        }
+        catch (Exception e){}
+
         reference.orderByChild("userId").equalTo(mFirebaseUser.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
             @RequiresApi(api = Build.VERSION_CODES.O)
             @Override
@@ -99,6 +159,28 @@ public class HomeActivity extends AppCompatActivity {
                             }
                         }
                     }
+                    //No medication to take today
+                    if(retrieveMedDetails.size() == 0){
+                        nDialog.dismiss();
+                        noTodayMed.setVisibility(View.VISIBLE);
+                        noData.setVisibility(View.GONE);
+                        recyclerView.setVisibility(View.GONE);
+                    }
+                    //Today's medicine
+                    else{
+                        nDialog.dismiss();
+                        noTodayMed.setVisibility(View.GONE);
+                        noData.setVisibility(View.GONE);
+                        recyclerView.setVisibility(View.VISIBLE);
+                        setUpMedicineCards();
+                    }
+                }
+                //No medicine detail is found
+                else{
+                    nDialog.dismiss();
+                    noData.setVisibility(View.VISIBLE);
+                    recyclerView.setVisibility(View.GONE);
+                    noTodayMed.setVisibility(View.GONE);
                 }
             }
             @Override

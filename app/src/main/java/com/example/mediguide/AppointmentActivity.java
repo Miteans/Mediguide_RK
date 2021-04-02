@@ -1,13 +1,17 @@
 package com.example.mediguide;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
+import android.telephony.mbms.StreamingServiceInfo;
 import android.view.View;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import android.graphics.drawable.Drawable;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -26,22 +30,31 @@ import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 
 public class AppointmentActivity extends AppCompatActivity {
     MaterialToolbar mToolbar;
     DatabaseReference reference;
-    private ImageView imageView;
+    private ImageView imageView,imageView1;
     ArrayList<Appointment> retrieveAppointmentDetails;
     private RecyclerView recyclerView;
+    private LinearLayout noData,noTodayApp;
     private AppointmentAdapter appointmentAdapter;
+    private View v;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.appointment_activity);
+
+        noTodayApp = findViewById(R.id.noTodayApp);
+        noData = findViewById(R.id.noData);
+        recyclerView = findViewById(R.id.recyclerView);
 
         FloatingActionButton fab = findViewById(R.id.fab1);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -68,8 +81,20 @@ public class AppointmentActivity extends AppCompatActivity {
         }
         catch (Exception e){}
 
+        imageView1 = findViewById(R.id.image_view1);
+        try {
+            Picasso.with(this)
+                    .load(R.drawable.calendar)
+                    /*.placeholder(R.drawable.placeholder) //optional*/
+                    .resize(350, 260)         //optional
+                    /*.centerCrop()       */                 //optional
+                    .into(imageView1);
+        }
+        catch (Exception e){}
+
 
         reference.orderByChild("userId").equalTo(mFirebaseUser.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+            @RequiresApi(api = Build.VERSION_CODES.O)
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 int i = 0;
@@ -85,7 +110,35 @@ public class AppointmentActivity extends AppCompatActivity {
 
                         retrieveAppointmentDetails.add(dummy);
                         setUpAppointmentCards();
+
+//                        //code to get appointment notification
+//                        if(snapshot.child("isReminderSet").getValue(Boolean.class)){
+//                            if(checkTheDate(snapshot.child("date").getValue().toString())) {
+//                                //  retrieveDataFromDatabase(snapshot);
+//                                System.out.println("**************************************Hello************************************");
+//                                public void sendMsg(View v) {
+//                                    String uniqueActionString = "com.androidbook.intents.testbc";
+//                                    Intent broadcastIntent = new Intent(uniqueActionString);
+//                                    broadcastIntent.putExtra("message","Hello world");
+//                                    sendBroadcast(broadcastIntent);
+//                                }
+//                            }
+//                        }
                     }
+                    //No medication to take today
+                    if(retrieveAppointmentDetails.size() == 0){
+//                        nDialog.dismiss();
+                        noTodayApp.setVisibility(View.VISIBLE);
+                        noData.setVisibility(View.GONE);
+                        recyclerView.setVisibility(View.GONE);
+                    }
+                }
+                //No medicine detail is found
+                else{
+//                    nDialog.dismiss();
+                    noTodayApp.setVisibility(View.GONE);
+                    recyclerView.setVisibility(View.GONE);
+                    noData.setVisibility(View.VISIBLE);
                 }
             }
 
@@ -123,5 +176,29 @@ public class AppointmentActivity extends AppCompatActivity {
         appointmentAdapter = new AppointmentAdapter(this);
         recyclerView.setAdapter(appointmentAdapter);
         appointmentAdapter.setDataToAppointmentAdapter(retrieveAppointmentDetails);
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    private boolean checkTheDate(String appDateString){
+        Date currentDate = new Date();
+        Date appDate = currentDate;
+        Date prevDate = currentDate;
+        SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
+        Calendar c = Calendar.getInstance();
+        try{
+            appDate = format.parse(appDateString);
+            c.setTime(format.parse(appDateString));
+        }
+        catch (Exception e){
+        }
+
+        c.add(Calendar.DAY_OF_MONTH,-1);
+
+        try{
+            prevDate = format.parse(format.format(c.getTime()));
+        }
+        catch (Exception e){}
+
+        return (appDate.compareTo(currentDate) * prevDate.compareTo(currentDate) <= 0);
     }
 }
