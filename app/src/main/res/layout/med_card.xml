@@ -22,7 +22,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/card_border"
-        android:visibility="gone"
+        android:visibility="visible"
         >
         <LinearLayout
             android:layout_width="match_parent"
@@ -409,7 +409,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="2dp"
-        android:background="@drawable/card_border">
+        android:background="@drawable/card_border"
+        android:visibility="gone">
 
         <RelativeLayout
             android:layout_width="wrap_content"

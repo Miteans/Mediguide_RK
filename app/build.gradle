@@ -50,4 +50,5 @@ dependencies {
     implementation 'androidx.cardview:cardview:1.0.0'
     implementation 'com.github.mthli:Slice:v1.3'
     implementation 'com.github.jhonnyx2012:horizontal-picker:1.0.6'
+    implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
 }

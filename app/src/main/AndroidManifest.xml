@@ -31,6 +31,9 @@
         <activity android:name=".MedAddActivity" />
         <activity android:name=".MedicationActivity"/>
         <activity android:name=".AppointmentForm"/>
+        <activity android:name=".ProfileActivity"/>
+        <activity android:name=".EditProfile"/>
+        <activity android:name=".DeviceConnectActivity"/>
         <receiver android:name=".ReminderBroadcast"/>
 
     </application>

@@ -262,12 +262,12 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     public void openConnectActivity(){
-        Intent intent = new Intent(this, MedicationActivity.class);
+        Intent intent = new Intent(this, DeviceConnectActivity.class);
         startActivity(intent);
     }
 
     public void openProfileActivity(){
-        Intent intent = new Intent(this, MainActivity.class);
+        Intent intent = new Intent(this, ProfileActivity.class);
         startActivity(intent);
     }
 
