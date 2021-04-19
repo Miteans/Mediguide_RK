@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -22,6 +23,8 @@ import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.android.material.appbar.AppBarLayout;
 
 import java.util.ArrayList;
 
@@ -56,9 +59,9 @@ public class DeviceConnectAdapter extends RecyclerView.Adapter<DeviceConnectAdap
     }
 
     @Override
-    public void onBindViewHolder(@NonNull DeviceConnectAdapter.ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         //set text view
-        holder.textView.setText(arrayList.get(position));
+//        holder.textView.setText(arrayList.get(position));
 
         holder.itemView.setOnLongClickListener(new OnLongClickListener() {
             @Override
@@ -175,8 +178,8 @@ public class DeviceConnectAdapter extends RecyclerView.Adapter<DeviceConnectAdap
             }
         });
         if(isSelectAll){
-            holder.ivCheckBox.setVisibility(View.VISIBLE);
-            holder.itemView.setBackgroundColor(Color.LTGRAY);
+            holder.ivCheckBox.setVisibility(VISIBLE);
+            holder.itemView.setBackgroundColor(LTGRAY);
         }else{
             holder.ivCheckBox.setVisibility(GONE);
             holder.itemView.setBackgroundColor(TRANSPARENT);
@@ -187,7 +190,8 @@ public class DeviceConnectAdapter extends RecyclerView.Adapter<DeviceConnectAdap
     private void ClickItem(ViewHolder holder) {
         //get selected item value
         String s = arrayList.get(holder.getAdapterPosition());
-        //chect condition
+
+        //check condition
         if(holder.ivCheckBox.getVisibility() == GONE) {
             //when item is not selected
             //visible checkbox image
@@ -219,15 +223,17 @@ public class DeviceConnectAdapter extends RecyclerView.Adapter<DeviceConnectAdap
 
     public class ViewHolder extends RecyclerView.ViewHolder{
         //Initialise variable
-        TextView textView;
+        RelativeLayout textView;
         ImageView ivCheckBox;
+        AppBarLayout appBarLayout;
 
         public ViewHolder(@NonNull View itemView){
 
             super(itemView);
             //Assign varaibles
-            textView = itemView.findViewById(R.id.text_view);
+            textView = itemView.findViewById(R.id.relativeLayout);
             ivCheckBox = itemView.findViewById(R.id.iv_check_box);
+            appBarLayout = itemView.findViewById(R.id.appBarLayout2);
         }
 
     }
