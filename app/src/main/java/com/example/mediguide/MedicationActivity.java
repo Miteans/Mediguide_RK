@@ -1,17 +1,23 @@
 package com.example.mediguide;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.mediguide.adapters.MedicationAdapter;
+import com.example.mediguide.data.MedicineInformation;
+import com.example.mediguide.forms.MedAddActivity;
 import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -21,32 +27,89 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class MedicationActivity extends AppCompatActivity {
-    MaterialToolbar mToolbar;
     DatabaseReference reference;
     ArrayList<MedicineInformation> retrieveMedDetails;
     private RecyclerView recyclerView;
     private MedicationAdapter medicationAdapter;
+    ProgressDialog nDialog;
+    ImageView imageView;
+    private LinearLayout noData;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.medication_activity);
 
+        MaterialToolbar toolbar = (MaterialToolbar) findViewById(R.id.topAppBar);
+        setSupportActionBar(toolbar);
+
+        nDialog = new ProgressDialog(MedicationActivity.this);
+        nDialog.setMessage("Loading..");
+        nDialog.setTitle("Get Data");
+        nDialog.setIndeterminate(false);
+        nDialog.setCancelable(true);
+        nDialog.show();
+
+        recyclerView = findViewById(R.id.recyclerView);
+        noData = findViewById(R.id.noData);
+
+        imageView = findViewById(R.id.image_view);
+        try {
+            Picasso.with(this)
+                    .load(R.drawable.nomedfound)
+                    /*.placeholder(R.drawable.placeholder) //optional*/
+                    .resize(350, 260)         //optional
+                    /*.centerCrop()       */                 //optional
+                    .into(imageView);
+        }
+        catch (Exception e){}
+
         reference = FirebaseDatabase.getInstance().getReference().child("MedicineInformation");
         FirebaseAuth mFirebaseAuth = FirebaseAuth.getInstance();
-        FirebaseUser mFirebaseUser=mFirebaseAuth.getCurrentUser();
+        FirebaseUser mFirebaseUser = mFirebaseAuth.getCurrentUser();
+
+
+        FloatingActionButton fab = findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                openMedAddPageOneActivity();
+            }
+        });
+
+        BottomNavigationView bottomNavigationView = (BottomNavigationView) findViewById(R.id.bottom_navigation);
+        bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.home:
+                        openHomeActivity();
+                        return true;
+                    case R.id.medication:
+                        return true;
+                    case R.id.connect:
+                        openConnectActivity();
+                        return true;
+                    case R.id.profile:
+                        openProfileActivity();
+                        return true;
+                }
+                return false;
+            }
+        });
 
         reference.orderByChild("userId").equalTo(mFirebaseUser.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 int i = 0;
-                if(dataSnapshot.exists()){
+                if (dataSnapshot.exists()) {
                     retrieveMedDetails = new ArrayList<MedicineInformation>();
-                    for(DataSnapshot snapshot : dataSnapshot.getChildren() ){
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                         MedicineInformation dummy = new MedicineInformation();
                         dummy.setMedicineName(snapshot.child("medicineName").getValue().toString());
                         dummy.setFormOfMedicine(snapshot.child("formOfMedicine").getValue().toString());
@@ -54,13 +117,14 @@ public class MedicationActivity extends AppCompatActivity {
                         dummy.setReasonForIntake(snapshot.child("reasonForIntake").getValue().toString());
                         dummy.setEverydayMed((boolean) snapshot.child("everydayMed").getValue(Boolean.class));
 
-                        if(!dummy.getEverydayMed()) {
+                        if (!dummy.getEverydayMed()) {
                             dummy.setNoMedIntake(Integer.parseInt(snapshot.child("noMedIntake").getValue().toString()));
                         }
 
                         dummy.setFrequencyOfMedIntake(Integer.parseInt(snapshot.child("frequencyOfMedIntake").getValue().toString()));
 
-                        GenericTypeIndicator<List<String>> genericTypeIndicator = new GenericTypeIndicator<List<String>>() {};
+                        GenericTypeIndicator<List<String>> genericTypeIndicator = new GenericTypeIndicator<List<String>>() {
+                        };
                         dummy.setIntakeTimes(snapshot.child("intakeTimes").getValue(genericTypeIndicator));
 
                         dummy.setImageUrl(snapshot.child("imageUrl").getValue().toString());
@@ -75,31 +139,47 @@ public class MedicationActivity extends AppCompatActivity {
                         printData(retrieveMedDetails);
                     }
                 }
+                //No medicine detail is found
+                else{
+                    recyclerView.setVisibility(View.GONE);
+                    noData.setVisibility(View.VISIBLE);
+                    nDialog.dismiss();
+                }
             }
+
             @Override
             public void onCancelled(DatabaseError databaseError) {
             }
         });
+    }
 
-        //Back Button(To Home)
-        mToolbar = (MaterialToolbar) findViewById(R.id.topAppBar);
-        mToolbar.setNavigationIcon(R.drawable.ic_baseline_arrow_back_24);
-        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(MedicationActivity.this,HomeActivity.class);
-                startActivity(intent);
-                finish();
-            }
-        });
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_top_bar, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
 
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                openMedAddPageOneActivity();
-            }
-        });
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.appointment:
+                //add the function to perform here
+                openAppointmentActivity();
+                return true;
+            case R.id.refill:
+                //add the function to perform here
+                openConnectActivity();
+                return true;
+            case R.id.report:
+                //add the function to perform here
+                openHomeActivity();
+                return true;
+            case R.id.settings:
+                //add the function to perform here
+                openSettingsActivity();
+                return true;
+        }
+        return false;
     }
 
     private void openMedAddPageOneActivity(){
@@ -113,15 +193,54 @@ public class MedicationActivity extends AppCompatActivity {
         }
     }
 
+    public void openHomeActivity(){
+        Intent intent = new Intent(this, HomeActivity.class);
+        startActivity(intent);
+        overridePendingTransition(0,0);
+    }
+
+    public void openMedicationActivity(){
+        Intent intent = new Intent(this, MedicationActivity.class);
+        startActivity(intent);
+        overridePendingTransition(0,0);
+    }
+
+    public void openConnectActivity(){
+        Intent intent = new Intent(this, DeviceConnectActivity.class);
+        startActivity(intent);
+        overridePendingTransition(0,0);
+    }
+
+    public void openProfileActivity(){
+        Intent intent = new Intent(this, ProfileActivity.class);
+        startActivity(intent);
+        overridePendingTransition(0,0);
+    }
+
+    public void openAppointmentActivity(){
+        Intent intent = new Intent(this, AppointmentActivity.class);
+        startActivity(intent);
+        overridePendingTransition(0,0);
+    }
+
+    public void openSettingsActivity(){
+        Intent intent = new Intent(this, SettingsActivity.class);
+        startActivity(intent);
+        overridePendingTransition(0,0);
+    }
+
     private void setUpMedicineCards(){
-        recyclerView = findViewById(R.id.recyclerView);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setFocusable(false);
 
         medicationAdapter = new MedicationAdapter(this);
         recyclerView.setAdapter(medicationAdapter);
-
         medicationAdapter.setDataToMedicationAdapter(retrieveMedDetails);
+        recyclerView.setVisibility(View.VISIBLE);
+        noData.setVisibility(View.GONE);
+        nDialog.dismiss();
     }
+
+
 }

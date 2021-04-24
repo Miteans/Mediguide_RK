@@ -1,4 +1,4 @@
-package com.example.mediguide;
+package com.example.mediguide.adapters;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -11,6 +11,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.mediguide.R;
+import com.example.mediguide.data.MedicineInformation;
 import com.ramotion.foldingcell.FoldingCell;
 import com.squareup.picasso.Picasso;
 
@@ -74,6 +76,9 @@ public class MedicationAdapter extends RecyclerView.Adapter<MedicationAdapter.Me
             System.out.println(e);
         }
 
+        if(holder.intakeTimes.getChildCount() > 0)
+            holder.intakeTimes.removeAllViews();
+
         for(String msg: medicine.getIntakeTimes()){
             holder.intakeTimes.addView(createTextView(msg));
         }
@@ -81,7 +86,7 @@ public class MedicationAdapter extends RecyclerView.Adapter<MedicationAdapter.Me
         holder.foldingCell.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                holder.foldingCell.toggle(false);
+                holder.foldingCell.toggle(true);
             }
         });
     }

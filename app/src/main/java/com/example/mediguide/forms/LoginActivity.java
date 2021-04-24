@@ -1,7 +1,8 @@
-package com.example.mediguide;
+package com.example.mediguide.forms;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Patterns;
 import android.view.View;
@@ -11,7 +12,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 
+import com.example.mediguide.HomeActivity;
+import com.example.mediguide.R;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -22,6 +26,8 @@ public class LoginActivity extends Activity {
     EditText email, password;
     Button login;
     FirebaseAuth mFirebaseAuth;
+    /*Intent mServiceIntent;
+    private DatabaseConnectBg mSensorService;*/
 
     boolean isEmailValid, isPasswordValid;
     @Override
@@ -50,12 +56,14 @@ public class LoginActivity extends Activity {
                     String userEmail = email.getText().toString();
                     String userPassword = password.getText().toString();
                     mFirebaseAuth.signInWithEmailAndPassword(userEmail, userPassword).addOnCompleteListener(LoginActivity.this, new OnCompleteListener<AuthResult>() {
+                        @RequiresApi(api = Build.VERSION_CODES.M)
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             if (!task.isSuccessful()) {
                                 Toast.makeText(LoginActivity.this, "Incorrect Username or Password", Toast.LENGTH_LONG).show();
                             } else {
                                 startActivity(new Intent(LoginActivity.this, HomeActivity.class));
+                                finish();
                                 Toast.makeText(LoginActivity.this, "Logged in Successfully", Toast.LENGTH_LONG).show();
                             }
                         }

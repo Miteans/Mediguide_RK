@@ -22,19 +22,21 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".LoginActivity" />
-        <activity android:name=".SignUpActivity" />
         <activity android:name=".HomeActivity" />
+        <activity android:name=".forms.MedAddActivity" />
         <activity android:name=".CarouselActivity" />
+        <activity android:name=".forms.LoginActivity" />
         <activity android:name=".AppointmentActivity" />
-        <activity android:name=".SettingsActivity" />
-        <activity android:name=".MedAddActivity" />
+        <activity android:name=".forms.AppointmentForm"/>
+        <activity android:name=".forms.SignUpActivity" />
+        <activity android:name=".SettingsActivity"/>
         <activity android:name=".MedicationActivity"/>
-        <activity android:name=".AppointmentForm"/>
+        <receiver android:name=".notification.AlarmReceiver"/>
+        <receiver android:name=".notification.AppointmentNotification"/>
+        <activity android:name=".notification.AlarmDisplay"/>
+        <activity android:name=".forms.EditProfile"/>
         <activity android:name=".ProfileActivity"/>
-        <activity android:name=".EditProfile"/>
         <activity android:name=".DeviceConnectActivity"/>
-        <receiver android:name=".ReminderBroadcast"/>
 
     </application>
 

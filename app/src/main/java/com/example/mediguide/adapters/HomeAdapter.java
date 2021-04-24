@@ -1,4 +1,4 @@
-package com.example.mediguide;
+package com.example.mediguide.adapters;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -11,6 +11,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.mediguide.R;
+import com.example.mediguide.data.MedicineInformation;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -30,18 +32,27 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.HomeViewHolder
 
     @NonNull
     @Override
-    public HomeAdapter.HomeViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public HomeViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.home_card,parent,false);
-        return new HomeAdapter.HomeViewHolder(view);
+        return new HomeViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull HomeAdapter.HomeViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull HomeViewHolder holder, int position) {
         MedicineInformation medicine = todayMedicines.get(position);
         System.out.println();
         holder.medicineName.setText(medicine.getMedicineName());
-        holder.dosage.setText("Dosage : " + medicine.getDosage());
-        holder.frequencyOfMedIntake.setText("Frequency of medicine intake : " + medicine.getFrequencyOfMedIntake());
+        holder.dosage.setText("Dosage : " + String.valueOf(medicine.getDosage()));
+        holder.frequencyOfMedIntake.setText("Frequency : " + String.valueOf(medicine.getFrequencyOfMedIntake()));
+
+        if(holder.intakeTimes.getChildCount() > 0)
+            holder.intakeTimes.removeAllViews();
+
+        for(String msg: medicine.getIntakeTimes()){
+            holder.intakeTimes.addView(createTextView(msg));
+        }
+
+
         try {
             Picasso.with(context)
                     .load(medicine.getImageUrl())
@@ -52,9 +63,6 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.HomeViewHolder
         }
         catch (Exception e){}
 
-        for(String msg: medicine.getIntakeTimes()){
-            holder.intakeTimes.addView(createTextView(msg));
-        }
 
     }
 
@@ -62,8 +70,8 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.HomeViewHolder
         TextView textView = new TextView(context);
         textView.setPadding(5, 0, 5, 0);
         textView.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT));
-        textView.setTextColor(context.getResources().getColor(R.color.primary));
         textView.setTextSize(15);
+        //textView.setTextColor(ContextCompat.getColor(context.getApplicationContext(), android.R.color.tab_indicator_text ));
         textView.setText(msg);
         return textView;
     }

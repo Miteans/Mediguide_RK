@@ -1,9 +1,6 @@
+
 package com.example.mediguide;
 
-import android.app.AlarmManager;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Color;
@@ -20,12 +17,14 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.mediguide.adapters.HomeAdapter;
+import com.example.mediguide.data.MedicineInformation;
+import com.example.mediguide.forms.MedAddActivity;
 import com.github.jhonnyx2012.horizontalpicker.DatePickerListener;
 import com.github.jhonnyx2012.horizontalpicker.HorizontalPicker;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -40,7 +39,6 @@ import org.joda.time.DateTime;
 
 import java.text.SimpleDateFormat;
 
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -51,8 +49,8 @@ public class HomeActivity extends AppCompatActivity {
     ArrayList<MedicineInformation> retrieveMedDetails;
     private RecyclerView recyclerView;
     private HomeAdapter homeAdapter;
+    private LinearLayout noData, noTodayMed;
     private ImageView imageView,imageView1;
-    private LinearLayout noTodayMed,noData;
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -103,22 +101,10 @@ public class HomeActivity extends AppCompatActivity {
 
         picker.setDate(new DateTime());
 
-        /*createNotificationChannel();
-
-        Intent intent = new Intent(HomeActivity.this, ReminderBroadcast.class);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0,intent, 0);
-        AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
-        alarmManager.set(AlarmManager.RTC_WAKEUP, 20000, pendingIntent);*/
-
-
-        reference = FirebaseDatabase.getInstance().getReference().child("MedicineInformation");
-        FirebaseAuth mFirebaseAuth = FirebaseAuth.getInstance();
-        FirebaseUser mFirebaseUser=mFirebaseAuth.getCurrentUser();
-
         imageView = findViewById(R.id.image_view);
         try {
             Picasso.with(this)
-                    .load(R.drawable.calendar1)
+                    .load(R.drawable.calendar)
                     /*.placeholder(R.drawable.placeholder) //optional*/
                     .resize(350, 260)         //optional
                     /*.centerCrop()       */                 //optional
@@ -130,13 +116,18 @@ public class HomeActivity extends AppCompatActivity {
         imageView1 = findViewById(R.id.image_view1);
         try {
             Picasso.with(this)
-                    .load(R.drawable.calendar1)
+                    .load(R.drawable.calendar)
                     /*.placeholder(R.drawable.placeholder) //optional*/
                     .resize(350, 260)         //optional
                     /*.centerCrop()       */                 //optional
                     .into(imageView1);
         }
         catch (Exception e){}
+
+
+        reference = FirebaseDatabase.getInstance().getReference().child("MedicineInformation");
+        FirebaseAuth mFirebaseAuth = FirebaseAuth.getInstance();
+        FirebaseUser mFirebaseUser=mFirebaseAuth.getCurrentUser();
 
         reference.orderByChild("userId").equalTo(mFirebaseUser.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
             @RequiresApi(api = Build.VERSION_CODES.O)
@@ -204,19 +195,18 @@ public class HomeActivity extends AppCompatActivity {
             public boolean onNavigationItemSelected(MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.home:
-                        openHomeActivity();
-                        break;
+                        return true;
                     case R.id.medication:
                         openMedicationActivity();
-                        break;
+                        return true;
                     case R.id.connect:
                         openConnectActivity();
-                        break;
+                        return true;
                     case R.id.profile:
                         openProfileActivity();
-                        break;
+                        return true;
                 }
-                return true;
+                return false;
             }
         });
     }
@@ -234,60 +224,66 @@ public class HomeActivity extends AppCompatActivity {
             case R.id.appointment:
                 //add the function to perform here
                 openAppointmentActivity();
-                break;
+                return true;
             case R.id.refill:
                 //add the function to perform here
                 openConnectActivity();
-                return (true);
+                return true;
             case R.id.report:
                 //add the function to perform here
                 openHomeActivity();
-                break;
+                return true;
             case R.id.settings:
                 //add the function to perform here
                 openSettingsActivity();
-                break;
+                return true;
         }
-        return true;
+        return false;
     }
 
     public void openHomeActivity(){
         Intent intent = new Intent(this, HomeActivity.class);
         startActivity(intent);
+        overridePendingTransition(0,0);
     }
 
     public void openMedicationActivity(){
         Intent intent = new Intent(this, MedicationActivity.class);
         startActivity(intent);
+        overridePendingTransition(0,0);
     }
 
     public void openConnectActivity(){
         Intent intent = new Intent(this, DeviceConnectActivity.class);
         startActivity(intent);
+        overridePendingTransition(0,0);
     }
 
     public void openProfileActivity(){
         Intent intent = new Intent(this, ProfileActivity.class);
         startActivity(intent);
+        overridePendingTransition(0,0);
     }
 
     public void openMedAddPageOneActivity(){
         Intent intent = new Intent(this, MedAddActivity.class);
         startActivity(intent);
+        overridePendingTransition(0,0);
     }
 
     public void openAppointmentActivity(){
         Intent intent = new Intent(this, AppointmentActivity.class);
         startActivity(intent);
+        overridePendingTransition(0,0);
     }
 
     public void openSettingsActivity(){
         Intent intent = new Intent(this, SettingsActivity.class);
         startActivity(intent);
+        overridePendingTransition(0,0);
     }
 
     private void setUpMedicineCards() {
-        recyclerView = findViewById(R.id.recyclerView);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setFocusable(false);
@@ -307,7 +303,7 @@ public class HomeActivity extends AppCompatActivity {
         Calendar c = Calendar.getInstance();
         try{
             medDate = format.parse(medDateString);
-            c.setTime(format.parse(medDateString));
+            c.setTime(medDate);
         }
         catch (Exception e){
         }
@@ -370,18 +366,5 @@ public class HomeActivity extends AppCompatActivity {
         dummy.setImageUrl(snapshot.child("imageUrl").getValue().toString());
 
         retrieveMedDetails.add(dummy);
-        setUpMedicineCards();
     }
-
-    /*@RequiresApi(api = Build.VERSION_CODES.O)
-    private void createNotificationChannel(){
-        CharSequence name  = "cghhfjknl";
-        String description = "hchvkhnlkmkln";
-        int importance = NotificationManager.IMPORTANCE_DEFAULT;
-        NotificationChannel channel = new NotificationChannel("NotifyMedIntake", name, importance);
-        channel.setDescription(description);
-
-        NotificationManager notificationManager = getSystemService(NotificationManager.class);
-        notificationManager.createNotificationChannel(channel);
-    }*/
 }

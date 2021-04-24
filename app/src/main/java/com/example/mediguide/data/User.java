@@ -1,10 +1,19 @@
-package com.example.mediguide;
+package com.example.mediguide.data;
 
 public class User {
     private String Name;
     private String Email;
     private Long PhoneNumber;
     private String Password;
+    private String userId;
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
 
     public User() {
     }

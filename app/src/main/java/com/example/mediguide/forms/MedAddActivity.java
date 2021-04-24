@@ -1,27 +1,26 @@
-package com.example.mediguide;
+package com.example.mediguide.forms;
+
 import android.Manifest;
+import android.app.AlarmManager;
 import android.app.DatePickerDialog;
+import android.app.PendingIntent;
+import android.app.ProgressDialog;
 import android.app.TimePickerDialog;
-import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.media.Image;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.MimeTypeMap;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
@@ -40,47 +39,41 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentActivity;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
-import androidx.viewpager.widget.ViewPager;
-import androidx.fragment.app.FragmentPagerAdapter;
 
+import com.example.mediguide.MedicationActivity;
+import com.example.mediguide.R;
+import com.example.mediguide.data.MedicineInformation;
+import com.example.mediguide.notification.AlarmReceiver;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.appbar.MaterialToolbar;
-import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.StorageTask;
 import com.google.firebase.storage.UploadTask;
 
-import org.w3c.dom.Text;
-
 import java.io.ByteArrayOutputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collection;
-import java.util.Iterator;
+import java.util.Date;
 import java.util.List;
-import java.util.ListIterator;
-
+import java.util.Locale;
+import java.util.Random;
 
 public class MedAddActivity extends AppCompatActivity {
     MaterialToolbar mToolbar;
     View view1, view2, view3;
     LinearLayout fragmentOne, fragmentTwo, fragmentThree;
     int intakeIndex;
+    String ChannelId;
+    int randomId;
 
     Button backToFirstFragment, goToSecondFragment, goToThirdFragment, backToSecondFragment, camera, saveMedInfo;
     ImageView imageView;
@@ -98,6 +91,7 @@ public class MedAddActivity extends AppCompatActivity {
     DatabaseReference reference;
     StorageReference storageReference;
     StorageTask upload;
+    ProgressDialog nDialog;
 
     Bitmap capturedImage;
 
@@ -264,9 +258,15 @@ public class MedAddActivity extends AppCompatActivity {
         saveMedInfo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 //if the form validation is true
                 if(setValidation()){
+
+                    nDialog = new ProgressDialog(MedAddActivity.this);
+                    nDialog.setMessage("Loading..");
+                    nDialog.setTitle("Saving Data");
+                    nDialog.setIndeterminate(false);
+                    nDialog.setCancelable(true);
+                    nDialog.show();
 
                     medicineInformation.setMedicineName(medicineName.getText().toString());
                     medicineInformation.setFormOfMedicine(selectedFormOfMedicine);
@@ -330,6 +330,7 @@ public class MedAddActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                         Ref.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                            @RequiresApi(api = Build.VERSION_CODES.O)
                             @Override
                             public void onSuccess(Uri uri) {
                                 String url = uri.toString();
@@ -337,7 +338,11 @@ public class MedAddActivity extends AppCompatActivity {
 
                                 //Adding data to database
                                 reference.push().setValue(medicineInformation);
-
+                                if(medicineInformation.getEverydayMed())
+                                    setDailyReminder();
+                                else
+                                    setPeriodicReminder();
+                                nDialog.dismiss();
                                 //Confirmation and clearing the form
                                 Toast.makeText(MedAddActivity.this, "Saved successfully", Toast.LENGTH_LONG).show();
                                 clearForm();
@@ -450,7 +455,7 @@ public class MedAddActivity extends AppCompatActivity {
         mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(MedAddActivity.this,MedicationActivity.class);
+                Intent intent = new Intent(MedAddActivity.this, MedicationActivity.class);
                 startActivity(intent);
                 finish();
             }
@@ -597,7 +602,7 @@ public class MedAddActivity extends AppCompatActivity {
                     mTimePicker = new TimePickerDialog(MedAddActivity.this, new TimePickerDialog.OnTimeSetListener() {
                         @Override
                         public void onTimeSet(TimePicker timePicker, int selectedHour, int selectedMinute) {
-                            edtTime.setText(selectedHour + ":" + selectedMinute);
+                            edtTime.setText(String.format("%02d:%02d", selectedHour, selectedMinute));
                         }
                     }, hour, minute, false);//Yes 24 hour time
                     mTimePicker.setTitle("Select Time");
@@ -617,4 +622,98 @@ public class MedAddActivity extends AppCompatActivity {
         Intent intent = new Intent(MedAddActivity.this, MedAddActivity.class);
         startActivity(intent);
     }
+
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    private boolean checkTheDate(String medDateString, int medDuration){
+        Date currentDate = new Date();
+        Date medDate = currentDate;
+        Date endDate = currentDate;
+        SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
+        Calendar c = Calendar.getInstance();
+        try{
+            medDate = format.parse(medDateString);
+            c.setTime(medDate);
+        }
+        catch (Exception e){
+        }
+
+        c.add(Calendar.DAY_OF_MONTH, medDuration);
+
+        try{
+            endDate = format.parse(format.format(c.getTime()));
+        }
+        catch (Exception e){}
+
+        return (medDate.compareTo(currentDate) * currentDate.compareTo(endDate) >= 0);
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public void setDailyReminder() {
+        Date setDate = null;
+        Date currentDate = new Date();
+        Date endDate = null;
+        Calendar calendar = Calendar.getInstance();
+        Calendar getDuration = Calendar.getInstance();
+        SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
+
+        try{
+            setDate = format.parse(medicineInformation.getSetStartDate());
+        }
+        catch (Exception e){}
+
+        calendar.setTime(setDate);
+        getDuration.setTime(setDate);
+
+        getDuration.add(Calendar.DAY_OF_MONTH, medicineInformation.getDuration());
+
+        try{
+            endDate = format.parse(format.format(getDuration.getTime()));
+        }
+        catch (Exception e){}
+
+
+        Random random = new Random();
+
+        for(String time:medicineInformation.getIntakeTimes()){
+            String[] times = time.split(":");
+            randomId = random.nextInt();
+
+            calendar.set(Calendar.HOUR_OF_DAY, Integer.parseInt(String.valueOf(times[0])));
+            calendar.set(Calendar.MINUTE, Integer.parseInt(String.valueOf(times[1])));
+
+
+            Intent intent = new Intent(this, AlarmReceiver.class);
+            intent.putExtra("medicineName", medicineInformation.getMedicineName());
+            intent.putExtra("dosage", String.valueOf(medicineInformation.getDosage()));
+            intent.putExtra("instruction", medicineInformation.getInstruction());
+            intent.putExtra("otherInstruction", medicineInformation.getOtherInstruction());
+            intent.putExtra("day", String.valueOf(calendar.getDisplayName(Calendar.DAY_OF_WEEK, Calendar.LONG, Locale.ENGLISH)));
+            intent.putExtra("image", medicineInformation.getImageUrl());
+            intent.putExtra("time", time);
+            intent.putExtra("randomId", randomId);
+            intent.putExtra("endDate", endDate);
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(MedAddActivity.this, randomId, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+            AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+            long timeMilliSeconds = calendar.getTimeInMillis();
+            System.out.println(timeMilliSeconds);
+
+            if(endDate.compareTo(currentDate) > 0 && alarmManager != null)
+                alarmManager.cancel(pendingIntent);
+
+            else{
+                alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, timeMilliSeconds, AlarmManager.INTERVAL_DAY,
+                        pendingIntent);
+                System.out.println("It comes here ...........");
+            }
+        }
+
+    }
+
+    public void setPeriodicReminder(){
+
+    }
+
+
 }

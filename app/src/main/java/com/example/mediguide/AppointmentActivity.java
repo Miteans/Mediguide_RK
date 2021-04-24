@@ -1,58 +1,59 @@
 package com.example.mediguide;
+
+import android.app.ProgressDialog;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
-import android.telephony.mbms.StreamingServiceInfo;
 import android.view.View;
 
-import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.mediguide.adapters.AppointmentAdapter;
+import com.example.mediguide.data.Appointment;
+import com.example.mediguide.forms.AppointmentForm;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import android.graphics.drawable.Drawable;
+
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.appbar.MaterialToolbar;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
 
 
 public class AppointmentActivity extends AppCompatActivity {
     MaterialToolbar mToolbar;
     DatabaseReference reference;
-    private ImageView imageView,imageView1;
     ArrayList<Appointment> retrieveAppointmentDetails;
     private RecyclerView recyclerView;
-    private LinearLayout noData,noTodayApp;
     private AppointmentAdapter appointmentAdapter;
-    private View v;
+    private ProgressDialog nDialog;
+    private  ImageView imageView;
+    private LinearLayout noData;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.appointment_activity);
 
-        noTodayApp = findViewById(R.id.noTodayApp);
+        nDialog = new ProgressDialog(AppointmentActivity.this);
+        nDialog.setMessage("Loading..");
+        nDialog.setTitle("Get Data");
+        nDialog.setIndeterminate(false);
+        nDialog.setCancelable(true);
+        nDialog.show();
+
         noData = findViewById(R.id.noData);
         recyclerView = findViewById(R.id.recyclerView);
 
@@ -64,16 +65,10 @@ public class AppointmentActivity extends AppCompatActivity {
             }
         });
 
-
-        reference = FirebaseDatabase.getInstance().getReference().child("Appointment");
-
-        FirebaseAuth mFirebaseAuth = FirebaseAuth.getInstance();
-        FirebaseUser mFirebaseUser=mFirebaseAuth.getCurrentUser();
-
         imageView = findViewById(R.id.image_view);
         try {
             Picasso.with(this)
-                    .load(R.drawable.calendar)
+                    .load(R.drawable.calendar1)
                     /*.placeholder(R.drawable.placeholder) //optional*/
                     .resize(350, 260)         //optional
                     /*.centerCrop()       */                 //optional
@@ -81,20 +76,12 @@ public class AppointmentActivity extends AppCompatActivity {
         }
         catch (Exception e){}
 
-        imageView1 = findViewById(R.id.image_view1);
-        try {
-            Picasso.with(this)
-                    .load(R.drawable.calendar)
-                    /*.placeholder(R.drawable.placeholder) //optional*/
-                    .resize(350, 260)         //optional
-                    /*.centerCrop()       */                 //optional
-                    .into(imageView1);
-        }
-        catch (Exception e){}
 
+        reference = FirebaseDatabase.getInstance().getReference().child("Appointment");
+        FirebaseAuth mFirebaseAuth = FirebaseAuth.getInstance();
+        FirebaseUser mFirebaseUser=mFirebaseAuth.getCurrentUser();
 
         reference.orderByChild("userId").equalTo(mFirebaseUser.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
-            @RequiresApi(api = Build.VERSION_CODES.O)
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 int i = 0;
@@ -111,7 +98,7 @@ public class AppointmentActivity extends AppCompatActivity {
                         retrieveAppointmentDetails.add(dummy);
                         setUpAppointmentCards();
 
-//                        //code to get appointment notification
+                        //code to get appointment notification
 //                        if(snapshot.child("isReminderSet").getValue(Boolean.class)){
 //                            if(checkTheDate(snapshot.child("date").getValue().toString())) {
 //                                //  retrieveDataFromDatabase(snapshot);
@@ -125,20 +112,12 @@ public class AppointmentActivity extends AppCompatActivity {
 //                            }
 //                        }
                     }
-                    //No medication to take today
-                    if(retrieveAppointmentDetails.size() == 0){
-//                        nDialog.dismiss();
-                        noTodayApp.setVisibility(View.VISIBLE);
-                        noData.setVisibility(View.GONE);
-                        recyclerView.setVisibility(View.GONE);
-                    }
                 }
                 //No medicine detail is found
                 else{
-//                    nDialog.dismiss();
-                    noTodayApp.setVisibility(View.GONE);
                     recyclerView.setVisibility(View.GONE);
                     noData.setVisibility(View.VISIBLE);
+                    nDialog.dismiss();
                 }
             }
 
@@ -164,7 +143,7 @@ public class AppointmentActivity extends AppCompatActivity {
     }
 
     public void openAppointmentForm() {
-        Intent intent = new Intent(this, com.example.mediguide.AppointmentForm.class);
+        Intent intent = new Intent(this, AppointmentForm.class);
         startActivity(intent);
     }
 
@@ -176,29 +155,8 @@ public class AppointmentActivity extends AppCompatActivity {
         appointmentAdapter = new AppointmentAdapter(this);
         recyclerView.setAdapter(appointmentAdapter);
         appointmentAdapter.setDataToAppointmentAdapter(retrieveAppointmentDetails);
-    }
-
-    @RequiresApi(api = Build.VERSION_CODES.O)
-    private boolean checkTheDate(String appDateString){
-        Date currentDate = new Date();
-        Date appDate = currentDate;
-        Date prevDate = currentDate;
-        SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
-        Calendar c = Calendar.getInstance();
-        try{
-            appDate = format.parse(appDateString);
-            c.setTime(format.parse(appDateString));
-        }
-        catch (Exception e){
-        }
-
-        c.add(Calendar.DAY_OF_MONTH,-1);
-
-        try{
-            prevDate = format.parse(format.format(c.getTime()));
-        }
-        catch (Exception e){}
-
-        return (appDate.compareTo(currentDate) * prevDate.compareTo(currentDate) <= 0);
+        recyclerView.setVisibility(View.VISIBLE);
+        noData.setVisibility(View.GONE);
+        nDialog.dismiss();
     }
 }

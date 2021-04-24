@@ -1,4 +1,4 @@
-package com.example.mediguide;
+package com.example.mediguide.models;
 
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;

@@ -38,7 +38,7 @@
         app:layout_constraintVertical_bias="0.466" />
 
     <TextView
-        android:id="@+id/topText"
+        android:id="@+id/time"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="104dp"
@@ -51,7 +51,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/topText2"
+        android:id="@+id/day"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="140dp"
@@ -79,7 +79,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/topText3"
+        android:id="@+id/medicineName"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="56dp"
@@ -92,10 +92,10 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/dosage1"
+        android:id="@+id/dosage"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/topText3"
+        android:layout_below="@+id/medicineName"
         android:layout_marginStart="60dp"
         android:layout_marginTop="484dp"
         android:layout_marginEnd="16dp"
@@ -107,6 +107,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
+        android:id="@+id/instruction"
         android:layout_width="wrap_content"
         android:layout_height="40dp"
         android:layout_marginStart="60dp"
@@ -120,16 +121,16 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.017"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/dosage1"
+        app:layout_constraintTop_toBottomOf="@+id/dosage"
         app:layout_constraintVertical_bias="0.0" />
 
 
 
     <TextView
-        android:id="@+id/otherinstrn1"
+        android:id="@+id/otherInstruction"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/topText3"
+        android:layout_below="@+id/medicineName"
         android:layout_marginStart="60dp"
         android:layout_marginTop="576dp"
         android:layout_marginEnd="16dp"

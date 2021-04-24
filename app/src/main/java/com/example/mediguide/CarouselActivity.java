@@ -11,6 +11,7 @@ import android.widget.ImageView;
 
 import androidx.annotation.RequiresApi;
 
+import com.example.mediguide.forms.LoginActivity;
 import com.synnapps.carouselview.CarouselView;
 import com.synnapps.carouselview.ImageListener;
 
@@ -48,6 +49,7 @@ public class CarouselActivity extends Activity {
     public void openLoginActivity(){
         Intent intent = new Intent(this, LoginActivity.class);
         startActivity(intent);
+        finish();
     }
 
 }

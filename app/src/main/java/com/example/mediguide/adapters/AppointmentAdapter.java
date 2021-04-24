@@ -1,16 +1,16 @@
-package com.example.mediguide;
+package com.example.mediguide.adapters;
+
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.ramotion.foldingcell.FoldingCell;
-import com.squareup.picasso.Picasso;
+import com.example.mediguide.R;
+import com.example.mediguide.data.Appointment;
 
 import java.util.ArrayList;
 
@@ -29,20 +29,20 @@ public class AppointmentAdapter extends RecyclerView.Adapter<AppointmentAdapter.
 
     @NonNull
     @Override
-    public AppointmentAdapter.AppointmentViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public AppointmentViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.appointment_card,parent,false);
-        return new AppointmentAdapter.AppointmentViewHolder(view);
+        return new AppointmentViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull AppointmentAdapter.AppointmentViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull AppointmentViewHolder holder, int position) {
         Appointment appointment = appointments.get(position);
         holder.medNum.setText(String.valueOf(position+1));
         holder.appointmentTitle.setText(appointment.getAppointment_title());
-        holder.hospitalName.setText("Hospital : " +appointment.getHospital_name());
+        holder.hospitalName.setText("Hospital : " + appointment.getHospital_name());
         holder.doctorName.setText("Doctor : " +appointment.getDoctor_name());
-        holder.appointmentDate.setText("Date : " +appointment.getDate());
-        holder.appointmentTime.setText("Time : " +appointment.getTime());
+        holder.appointmentDate.setText("Date : " + appointment.getDate());
+        holder.appointmentTime.setText("Timinings : " + appointment.getTime());
     }
 
     @Override

@@ -1,7 +1,4 @@
-package com.example.mediguide;
-
-import java.sql.Time;
-import java.util.Date;
+package com.example.mediguide.data;
 
 public class Appointment {
     private String appointment_title;

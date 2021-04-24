@@ -1,4 +1,4 @@
-package com.example.mediguide;
+package com.example.mediguide.data;
 
 import java.util.List;
 
