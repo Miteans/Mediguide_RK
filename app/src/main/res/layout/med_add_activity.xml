@@ -381,7 +381,10 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="30dp"
                         android:layout_gravity="end"
-                        android:text="Save" />
+                        android:text="Save"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:foreground="@drawable/custom_ripple_effect"/>
 
                 </LinearLayout>
 

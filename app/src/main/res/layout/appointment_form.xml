@@ -155,7 +155,10 @@
                 android:layout_margin="40dp"
                 android:background="@color/primary"
                 android:textColor="@color/white"
-                android:text="Done" />
+                android:text="Done"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="@drawable/custom_ripple_effect"/>
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>

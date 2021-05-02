@@ -95,7 +95,7 @@ public class LoginActivity extends Activity {
             password.setError(getResources().getString(R.string.password_error));
             isPasswordValid = false;
         } else if (password.getText().length() < 6) {
-            password.setError(getResources().getString(R.string.error_invalid_password));
+            password.setError("Please enter a password of minimum 6 characters");
             isPasswordValid = false;
         } else  {
             isPasswordValid = true;
