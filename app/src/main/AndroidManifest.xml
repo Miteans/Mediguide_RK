@@ -14,6 +14,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Mediguide">
+        <activity android:name=".ActivityControlling"></activity>
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -33,10 +34,15 @@
         <activity android:name=".MedicationActivity"/>
         <receiver android:name=".notification.AlarmReceiver"/>
         <receiver android:name=".notification.AppointmentNotification"/>
+        <receiver android:name=".notification.RefillNotification"/>
         <activity android:name=".notification.AlarmDisplay"/>
         <activity android:name=".forms.EditProfile"/>
         <activity android:name=".ProfileActivity"/>
         <activity android:name=".DeviceConnectActivity"/>
+        <activity android:name=".DeviceActivity"/>
+        <activity android:name=".Controlling"/>
+        <activity android:name=".RefillActivity"/>
+        <activity android:name=".ReportActivity"/>
 
     </application>
 

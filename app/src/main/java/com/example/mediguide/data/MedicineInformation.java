@@ -3,6 +3,7 @@ package com.example.mediguide.data;
 import java.util.List;
 
 public class MedicineInformation {
+    private String medicineId;
     private String medicineName;
     private int dosage;
     private String formOfMedicine;
@@ -141,6 +142,14 @@ public class MedicineInformation {
 
     public void setRefillCount(int refillCount){
         this.refillCount = refillCount;
+    }
+
+    public String getMedicineId() {
+        return medicineId;
+    }
+
+    public void setMedicineId(String medicineId) {
+        this.medicineId = medicineId;
     }
 
 }

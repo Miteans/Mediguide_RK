@@ -1,4 +1,3 @@
-
 package com.example.mediguide;
 
 import android.app.ProgressDialog;
@@ -51,6 +50,7 @@ public class HomeActivity extends AppCompatActivity {
     private HomeAdapter homeAdapter;
     private LinearLayout noData, noTodayMed;
     private ImageView imageView,imageView1;
+    ProgressDialog nDialog;
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,7 +67,6 @@ public class HomeActivity extends AppCompatActivity {
 
         // find the picker
         HorizontalPicker picker = (HorizontalPicker) findViewById(R.id.datePicker);
-        ProgressDialog nDialog;
         nDialog = new ProgressDialog(HomeActivity.this);
         nDialog.setMessage("Loading..");
         nDialog.setTitle("Get Data");
@@ -78,7 +77,7 @@ public class HomeActivity extends AppCompatActivity {
         DatePickerListener listener = new DatePickerListener() {
             @Override
             public void onDateSelected(DateTime dateSelected) {
-                System.out.println("Hello");
+                getDataFromDatabase(dateSelected.toDate());
             }
         };
 
@@ -100,6 +99,7 @@ public class HomeActivity extends AppCompatActivity {
                 .init();
 
         picker.setDate(new DateTime());
+        getDataFromDatabase(new Date());
 
         imageView = findViewById(R.id.image_view);
         try {
@@ -123,62 +123,6 @@ public class HomeActivity extends AppCompatActivity {
                     .into(imageView1);
         }
         catch (Exception e){}
-
-
-        reference = FirebaseDatabase.getInstance().getReference().child("MedicineInformation");
-        FirebaseAuth mFirebaseAuth = FirebaseAuth.getInstance();
-        FirebaseUser mFirebaseUser=mFirebaseAuth.getCurrentUser();
-
-        reference.orderByChild("userId").equalTo(mFirebaseUser.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
-            @RequiresApi(api = Build.VERSION_CODES.O)
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                int i = 0;
-                if(dataSnapshot.exists()){
-                    retrieveMedDetails = new ArrayList<MedicineInformation>();
-                    for(DataSnapshot snapshot : dataSnapshot.getChildren() ){
-                        //Daily Medication
-                        if(snapshot.child("everydayMed").getValue(Boolean.class)){
-                            if(checkTheDate(snapshot.child("setStartDate").getValue().toString(), snapshot.child("duration").getValue().toString())){
-                                retrieveDataFromDatabase(snapshot);
-                            }
-                        }
-                        //Not a daily Medication
-                        else{
-                            if(checkNoDate(snapshot)){
-                                retrieveDataFromDatabase(snapshot);
-                            }
-                        }
-                    }
-                    //No medication to take today
-                    if(retrieveMedDetails.size() == 0){
-                        nDialog.dismiss();
-                        noTodayMed.setVisibility(View.VISIBLE);
-                        noData.setVisibility(View.GONE);
-                        recyclerView.setVisibility(View.GONE);
-                    }
-                    //Today's medicine
-                    else{
-                        nDialog.dismiss();
-                        noTodayMed.setVisibility(View.GONE);
-                        noData.setVisibility(View.GONE);
-                        recyclerView.setVisibility(View.VISIBLE);
-                        setUpMedicineCards();
-                    }
-                }
-                //No medicine detail is found
-                else{
-                    nDialog.dismiss();
-                    noData.setVisibility(View.VISIBLE);
-                    recyclerView.setVisibility(View.GONE);
-                    noTodayMed.setVisibility(View.GONE);
-                }
-            }
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-            }
-        });
-
 
 
         FloatingActionButton fab = findViewById(R.id.fab);
@@ -227,11 +171,11 @@ public class HomeActivity extends AppCompatActivity {
                 return true;
             case R.id.refill:
                 //add the function to perform here
-                openConnectActivity();
+                openRefillActivity();
                 return true;
             case R.id.report:
                 //add the function to perform here
-                openHomeActivity();
+                openReportActivity();
                 return true;
             case R.id.settings:
                 //add the function to perform here
@@ -283,6 +227,18 @@ public class HomeActivity extends AppCompatActivity {
         overridePendingTransition(0,0);
     }
 
+    public void  openRefillActivity(){
+        Intent intent = new Intent(this, RefillActivity.class);
+        startActivity(intent);
+        overridePendingTransition(0,0);
+    }
+
+    public void openReportActivity(){
+        Intent intent = new Intent(this, ReportActivity.class);
+        startActivity(intent);
+        overridePendingTransition(0,0);
+    }
+
     private void setUpMedicineCards() {
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(linearLayoutManager);
@@ -295,8 +251,7 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
-    private boolean checkTheDate(String medDateString, String medDuration){
-        Date currentDate = new Date();
+    private boolean checkTheDate(String medDateString, String medDuration, Date currentDate){
         Date medDate = currentDate;
         Date endDate = currentDate;
         SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
@@ -318,8 +273,7 @@ public class HomeActivity extends AppCompatActivity {
         return (medDate.compareTo(currentDate) * currentDate.compareTo(endDate) >= 0);
     }
 
-    private boolean checkNoDate(DataSnapshot snapshot){
-        Date currentDate = new Date();
+    private boolean checkNoDate(DataSnapshot snapshot, Date currentDate){
         Date medDate = currentDate;
         Date endDate = currentDate;
         SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
@@ -366,5 +320,61 @@ public class HomeActivity extends AppCompatActivity {
         dummy.setImageUrl(snapshot.child("imageUrl").getValue().toString());
 
         retrieveMedDetails.add(dummy);
+    }
+
+    public void getDataFromDatabase(Date currentDate){
+        reference = FirebaseDatabase.getInstance().getReference().child("MedicineInformation");
+        FirebaseAuth mFirebaseAuth = FirebaseAuth.getInstance();
+        FirebaseUser mFirebaseUser=mFirebaseAuth.getCurrentUser();
+
+        reference.orderByChild("userId").equalTo(mFirebaseUser.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+            @RequiresApi(api = Build.VERSION_CODES.O)
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                int i = 0;
+                if(dataSnapshot.exists()){
+                    retrieveMedDetails = new ArrayList<MedicineInformation>();
+                    for(DataSnapshot snapshot : dataSnapshot.getChildren() ){
+                        //Daily Medication
+                        if(snapshot.child("everydayMed").getValue(Boolean.class)){
+                            if(checkTheDate(snapshot.child("setStartDate").getValue().toString(), snapshot.child("duration").getValue().toString(), currentDate)){
+                                retrieveDataFromDatabase(snapshot);
+                            }
+                        }
+                        //Not a daily Medication
+                        else{
+                            if(checkNoDate(snapshot, currentDate)){
+                                retrieveDataFromDatabase(snapshot);
+                            }
+                        }
+                    }
+                    //No medication to take today
+                    if(retrieveMedDetails.size() == 0){
+                        nDialog.dismiss();
+                        noTodayMed.setVisibility(View.VISIBLE);
+                        noData.setVisibility(View.GONE);
+                        recyclerView.setVisibility(View.GONE);
+                    }
+                    //Today's medicine
+                    else{
+                        nDialog.dismiss();
+                        noTodayMed.setVisibility(View.GONE);
+                        noData.setVisibility(View.GONE);
+                        recyclerView.setVisibility(View.VISIBLE);
+                        setUpMedicineCards();
+                    }
+                }
+                //No medicine detail is found
+                else{
+                    nDialog.dismiss();
+                    noData.setVisibility(View.VISIBLE);
+                    recyclerView.setVisibility(View.GONE);
+                    noTodayMed.setVisibility(View.GONE);
+                }
+            }
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+            }
+        });
     }
 }

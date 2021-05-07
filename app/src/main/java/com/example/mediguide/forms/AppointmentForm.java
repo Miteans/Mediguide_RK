@@ -236,7 +236,7 @@ public class AppointmentForm extends Activity {
         currCalendar.set(Calendar.HOUR_OF_DAY, (Integer.parseInt(String.valueOf(times[0])) - 4));
         currCalendar.set(Calendar.MINUTE, Integer.parseInt(String.valueOf(times[1])));
 
-        if(prevCalendar.getTime().compareTo(currentDate) > 0) {
+        if(prevCalendar.getTime().compareTo(currentDate) < 0) {
             Intent previousDayIntent = new Intent(this, AppointmentNotification.class);
             previousDayIntent.putExtra("appointmentName", appointment.getAppointment_title());
             previousDayIntent.putExtra("hospitalName", String.valueOf(appointment.getHospital_name()));
@@ -248,11 +248,10 @@ public class AppointmentForm extends Activity {
             AlarmManager prevAlarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
             long prevCalendarTimeInMillis = prevCalendar.getTimeInMillis();
             System.out.println(prevCalendarTimeInMillis);
-            prevAlarmManager.setRepeating(AlarmManager.RTC_WAKEUP, prevCalendarTimeInMillis, AlarmManager.INTERVAL_DAY,
-                    prevPendingIntent);
+            prevAlarmManager.set(AlarmManager.RTC_WAKEUP, prevCalendarTimeInMillis, prevPendingIntent);
         }
 
-        if(currCalendar.getTime().compareTo(currentDate) >= 0) {
+        if(currCalendar.getTime().compareTo(currentDate) <= 0) {
             Intent currentDayIntent = new Intent(this, AppointmentNotification.class);
             currentDayIntent.putExtra("appointmentName", appointment.getAppointment_title());
             currentDayIntent.putExtra("hospitalName", String.valueOf(appointment.getHospital_name()));
@@ -264,10 +263,8 @@ public class AppointmentForm extends Activity {
             AlarmManager currAlarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
             long currentCalendarTimeMillis = currCalendar.getTimeInMillis();
             System.out.println(currentCalendarTimeMillis);
-            currAlarmManager.setRepeating(AlarmManager.RTC_WAKEUP, currentCalendarTimeMillis, AlarmManager.INTERVAL_DAY,
-                    currentPendingIntent);
+            currAlarmManager.set(AlarmManager.RTC_WAKEUP, currentCalendarTimeMillis, currentPendingIntent);
         }
-
 
     }
 

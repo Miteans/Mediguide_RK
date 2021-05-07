@@ -43,7 +43,7 @@ public class  DeviceConnectAdapter extends RecyclerView.Adapter<DeviceConnectAda
     @NonNull
     @Override
     public DeviceConnectAdapter.ConnectViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.device_connect,parent,false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.device_connect_card,parent,false);
         return new DeviceConnectAdapter.ConnectViewHolder(view, deviceConnectActivity);
     }
 

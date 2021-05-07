@@ -49,10 +49,11 @@ public class DeviceConnectActivity extends AppCompatActivity {
     public boolean isActionMode = false;
     DeviceConnectAdapter adapter;
     public int position = -1;
+    AlertDialog alert;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        setContentView(R.layout.device_activity_header);
+        setContentView(R.layout.device_connect_activity);
         super.onCreate(savedInstanceState);
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -279,6 +280,9 @@ public class DeviceConnectActivity extends AppCompatActivity {
 
         if(item.getItemId() == R.id.menu_share && selectedActiveMeds.size() > 0){
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+            builder.setCancelable(false);
+
             builder.setMessage("Share " + selectedActiveMeds.size() + " items ?");
             builder.setTitle("Confirm");
 
@@ -296,7 +300,19 @@ public class DeviceConnectActivity extends AppCompatActivity {
                 }
             });
 
-            builder.show();
+            alert = builder.create();
+            alert = builder.show();
+
+            alert.getButton(android.app.AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener()
+            {
+                @Override
+                public void onClick(View v)
+                {
+                    Intent intent = new Intent(DeviceConnectActivity.this, DeviceActivity.class);
+                    startActivity(intent);
+                    alert.dismiss();
+                }
+            });
         }
 
         else if(item.getItemId() == R.id.menu_select_all){

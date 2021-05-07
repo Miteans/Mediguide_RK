@@ -13,32 +13,31 @@ import androidx.core.app.NotificationCompat;
 
 import com.example.mediguide.R;
 
-public class AppointmentNotification extends BroadcastReceiver {
+import java.util.Random;
 
-    private String appointmentName, day, time, hospitalName;
+public class RefillNotification extends BroadcastReceiver {
+
+    private String message;
     int id;
     private NotificationManager notificationManager;
 
     @Override
     public void onReceive(Context context, Intent intent) {
+        Random random = new Random();
         notificationManager = (NotificationManager) context.getSystemService(context.NOTIFICATION_SERVICE);
         System.out.println("Broadcast here .............................................");
 
-        //get the appointment data and flag values
+        //get the refill count message
         if (intent.getExtras() != null) {
-            appointmentName =  intent.getStringExtra("appointmentName");
-            hospitalName = intent.getStringExtra("hospitalName");
-            day = intent.getStringExtra("day");
-            time = intent.getStringExtra("time");
-            id = Integer.parseInt(intent.getStringExtra("randomId"));
-
+            message =  intent.getStringExtra("message");
+            id = intent.getIntExtra("randomId", random.nextInt());
         }
 
         //To show notification
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
                 .setSmallIcon(R.drawable.ic_baseline_access_alarm_24)
-                .setContentTitle("Appointment with the doctor")
-                .setContentText(appointmentName + "\n Hospital Name : " + hospitalName + "\n Day : " + day + "\n Time : " + time)
+                .setContentTitle("Refill Notification")
+                .setContentText(message)
                 .setAutoCancel(true)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC);//to show content in lock screen
 
@@ -57,11 +56,12 @@ public class AppointmentNotification extends BroadcastReceiver {
 
         System.out.println("Broadcast end................................");
 
-        Intent intent1 = new Intent(context.getApplicationContext(), AppointmentNotification.class);
+        Intent intent1 = new Intent(context.getApplicationContext(), RefillNotification.class);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(context.getApplicationContext(), id, intent1, PendingIntent.FLAG_UPDATE_CURRENT);
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(context.ALARM_SERVICE);
 
         alarmManager.cancel(pendingIntent);
+
 
     }
 }

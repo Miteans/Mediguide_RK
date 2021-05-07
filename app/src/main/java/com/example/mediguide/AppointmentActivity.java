@@ -4,22 +4,19 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-
-import androidx.appcompat.app.AppCompatActivity;
-
-import com.example.mediguide.adapters.AppointmentAdapter;
-import com.example.mediguide.data.Appointment;
-import com.example.mediguide.forms.AppointmentForm;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.mediguide.adapters.AppointmentAdapter;
+import com.example.mediguide.data.Appointment;
+import com.example.mediguide.forms.AppointmentForm;
 import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -98,19 +95,6 @@ public class AppointmentActivity extends AppCompatActivity {
                         retrieveAppointmentDetails.add(dummy);
                         setUpAppointmentCards();
 
-                        //code to get appointment notification
-//                        if(snapshot.child("isReminderSet").getValue(Boolean.class)){
-//                            if(checkTheDate(snapshot.child("date").getValue().toString())) {
-//                                //  retrieveDataFromDatabase(snapshot);
-//                                System.out.println("**************************************Hello************************************");
-//                                public void sendMsg(View v) {
-//                                    String uniqueActionString = "com.androidbook.intents.testbc";
-//                                    Intent broadcastIntent = new Intent(uniqueActionString);
-//                                    broadcastIntent.putExtra("message","Hello world");
-//                                    sendBroadcast(broadcastIntent);
-//                                }
-//                            }
-//                        }
                     }
                 }
                 //No medicine detail is found

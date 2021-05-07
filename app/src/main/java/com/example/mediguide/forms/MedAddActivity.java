@@ -268,6 +268,7 @@ public class MedAddActivity extends AppCompatActivity {
                     nDialog.setCancelable(true);
                     nDialog.show();
 
+                    medicineInformation.setMedicineId(medicineName.getText().toString() + " " + String.valueOf((new Date()).getTime()));
                     medicineInformation.setMedicineName(medicineName.getText().toString());
                     medicineInformation.setFormOfMedicine(selectedFormOfMedicine);
                     medicineInformation.setDosage(Integer.parseInt(dosage.getText().toString()));
@@ -338,10 +339,8 @@ public class MedAddActivity extends AppCompatActivity {
 
                                 //Adding data to database
                                 reference.push().setValue(medicineInformation);
-                                if(medicineInformation.getEverydayMed())
-                                    setDailyReminder();
-                                else
-                                    setPeriodicReminder();
+                                setReminder();
+
                                 nDialog.dismiss();
                                 //Confirmation and clearing the form
                                 Toast.makeText(MedAddActivity.this, "Saved successfully", Toast.LENGTH_LONG).show();
@@ -649,7 +648,7 @@ public class MedAddActivity extends AppCompatActivity {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
-    public void setDailyReminder() {
+    public void setReminder() {
         Date setDate = null;
         Date currentDate = new Date();
         Date endDate = null;
@@ -678,6 +677,7 @@ public class MedAddActivity extends AppCompatActivity {
         for(String time:medicineInformation.getIntakeTimes()){
             String[] times = time.split(":");
             randomId = random.nextInt();
+            System.out.println(randomId);
 
             calendar.set(Calendar.HOUR_OF_DAY, Integer.parseInt(String.valueOf(times[0])));
             calendar.set(Calendar.MINUTE, Integer.parseInt(String.valueOf(times[1])));
@@ -685,6 +685,7 @@ public class MedAddActivity extends AppCompatActivity {
 
             Intent intent = new Intent(this, AlarmReceiver.class);
             intent.putExtra("medicineName", medicineInformation.getMedicineName());
+            intent.putExtra("medicineId", medicineInformation.getMedicineId());
             intent.putExtra("dosage", String.valueOf(medicineInformation.getDosage()));
             intent.putExtra("instruction", medicineInformation.getInstruction());
             intent.putExtra("otherInstruction", medicineInformation.getOtherInstruction());
@@ -692,28 +693,31 @@ public class MedAddActivity extends AppCompatActivity {
             intent.putExtra("image", medicineInformation.getImageUrl());
             intent.putExtra("time", time);
             intent.putExtra("randomId", randomId);
-            intent.putExtra("endDate", endDate);
+            intent.putExtra("endDate", endDate.getTime());
             PendingIntent pendingIntent = PendingIntent.getBroadcast(MedAddActivity.this, randomId, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
             AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
             long timeMilliSeconds = calendar.getTimeInMillis();
             System.out.println(timeMilliSeconds);
 
-            if(endDate.compareTo(currentDate) > 0 && alarmManager != null)
+            if(endDate.compareTo(currentDate) < 0 && alarmManager != null){
                 alarmManager.cancel(pendingIntent);
+                System.out.println("Canceling alarm");
+            }
 
             else{
-                alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, timeMilliSeconds, AlarmManager.INTERVAL_DAY,
-                        pendingIntent);
+                if(medicineInformation.getEverydayMed())
+                    alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, timeMilliSeconds, AlarmManager.INTERVAL_DAY,
+                            pendingIntent);
+                else{
+                    alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, timeMilliSeconds,
+                            timeMilliSeconds * 24 * 60 * 60 * medicineInformation.getNoMedIntake(),
+                            pendingIntent);
+                }
                 System.out.println("It comes here ...........");
             }
         }
 
     }
-
-    public void setPeriodicReminder(){
-
-    }
-
 
 }
