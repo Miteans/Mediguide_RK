@@ -19,6 +19,7 @@ public class MedicineInformation {
     private String otherInstruction;
     private int refillCount;
     private String userId;
+    private String modeOfNotification;
 
     public MedicineInformation() {
     }
@@ -152,4 +153,11 @@ public class MedicineInformation {
         this.medicineId = medicineId;
     }
 
+    public String getModeOfNotification() {
+        return modeOfNotification;
+    }
+
+    public void setModeOfNotification(String modeOfNotification) {
+        this.modeOfNotification = modeOfNotification;
+    }
 }

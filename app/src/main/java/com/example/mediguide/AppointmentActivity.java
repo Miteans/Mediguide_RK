@@ -86,6 +86,7 @@ public class AppointmentActivity extends AppCompatActivity {
                     retrieveAppointmentDetails = new ArrayList<Appointment>();
                     for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                         Appointment dummy = new Appointment();
+                        dummy.setAppointmentId(snapshot.child("appointmentId").getValue().toString());
                         dummy.setAppointment_title(snapshot.child("appointment_title").getValue().toString());
                         dummy.setDoctor_name(snapshot.child("doctor_name").getValue().toString());
                         dummy.setHospital_name(snapshot.child("hospital_name").getValue().toString());

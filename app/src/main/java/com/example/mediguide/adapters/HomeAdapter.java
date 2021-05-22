@@ -71,7 +71,6 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.HomeViewHolder
         textView.setPadding(5, 0, 5, 0);
         textView.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT));
         textView.setTextSize(15);
-        //textView.setTextColor(ContextCompat.getColor(context.getApplicationContext(), android.R.color.tab_indicator_text ));
         textView.setText(msg);
         return textView;
     }

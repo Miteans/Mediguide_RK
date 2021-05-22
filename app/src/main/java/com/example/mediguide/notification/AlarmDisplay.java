@@ -7,24 +7,17 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.mediguide.R;
 import com.example.mediguide.data.MedicationReport;
-import com.example.mediguide.data.MedicineInformation;
-import com.example.mediguide.forms.MedAddActivity;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -33,20 +26,12 @@ import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
-import java.lang.reflect.Array;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.Date;
-import java.util.Dictionary;
-import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 public class AlarmDisplay extends AppCompatActivity {
@@ -54,6 +39,7 @@ public class AlarmDisplay extends AppCompatActivity {
     ImageView imageView;
     String dayString, timeString, medicineNameString, dosageString, instructionString, otherInstructionString, imageUrl, medicineId;
     RadioGroup confirmMedIntake;
+    String userId;
     DatabaseReference reference;
     DatabaseReference medicineDataReference;
     MedicationReport medicationReport = new MedicationReport();
@@ -78,6 +64,7 @@ public class AlarmDisplay extends AppCompatActivity {
         exactDate.setTime(getIntent().getLongExtra("currentDate", -1));
         medicineId = getIntent().getStringExtra("medicineId");
         endDate.setTime(getIntent().getLongExtra("endDate", -1));
+        userId = getIntent().getStringExtra("userId");
 
         time = findViewById(R.id.time);
         day = findViewById(R.id.day);
@@ -172,9 +159,7 @@ public class AlarmDisplay extends AppCompatActivity {
     private void addConfirmationToDatabase(Boolean flag){
         reference = FirebaseDatabase.getInstance().getReference().child("MedicationReport");
 
-        FirebaseAuth mFirebaseAuth = FirebaseAuth.getInstance();
-        FirebaseUser mFirebaseUser =  mFirebaseAuth.getCurrentUser();
-        reference.orderByChild("userId").equalTo(mFirebaseUser.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+        reference.orderByChild("userId").equalTo(userId).addListenerForSingleValueEvent(new ValueEventListener() {
             @RequiresApi(api = Build.VERSION_CODES.O)
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -195,14 +180,14 @@ public class AlarmDisplay extends AppCompatActivity {
                         //Given medicine reminder detail is not present for the current user
                         if(!dataExists && dataSnapshot.getChildrenCount() == dataCount){
                             System.out.println("Come here.......................");
-                            addReportData(flag, mFirebaseUser.getUid());
+                            addReportData(flag, userId);
                         }
                     }
 
                 }
                 //no medicine reminder details is found for the current user
                 else{
-                    addReportData(flag, mFirebaseUser.getUid());
+                    addReportData(flag, userId);
                 }
 
             }
@@ -274,10 +259,7 @@ public class AlarmDisplay extends AppCompatActivity {
     private void changeRefillValue(){
         medicineDataReference = FirebaseDatabase.getInstance().getReference().child("MedicineInformation");
 
-        FirebaseAuth mFirebaseAuth = FirebaseAuth.getInstance();
-        FirebaseUser mFirebaseUser =  mFirebaseAuth.getCurrentUser();
-
-        medicineDataReference.orderByChild("userId").equalTo(mFirebaseUser.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+        medicineDataReference.orderByChild("userId").equalTo(userId).addListenerForSingleValueEvent(new ValueEventListener() {
             @RequiresApi(api = Build.VERSION_CODES.O)
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -315,14 +297,13 @@ public class AlarmDisplay extends AppCompatActivity {
                 long days_difference = TimeUnit.MILLISECONDS.toDays(time_difference) % 365;
 
                 if(days_difference * dosage < refillCount && refillCount > 0)
-                    getNotification("You only left with " + String.valueOf(refillCount) + "pills..... Make sure to refill it again");
-                else
-                    getNotification("Oops there is no pill left for next medicine intake make sure to refill it again......");
+                    getNotification( "You only left with " + String.valueOf(refillCount) + "pills for the medicine "
+                            + medicineNameString + "\nPlease make sure to refill the medicine");
             }
 
         }
         else{
-            getNotification("Oops there is no pill left to take this medicine........");
+            getNotification("Oops there is no pill left to take this medicine " + medicineNameString + "");
         }
     }
 

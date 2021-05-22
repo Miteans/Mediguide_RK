@@ -1,12 +1,15 @@
 package com.example.mediguide.data;
 
 public class Appointment {
+    private String appointmentId;
     private String appointment_title;
     private String hospital_name;
     private String doctor_name;
     private String date;
     private String time;
     private boolean isReminderSet;
+    private String reminderDate;
+    private String reminderTime;
     private String userId;
 
     public Appointment() {
@@ -66,5 +69,29 @@ public class Appointment {
 
     public void setIsReminderSet(boolean isReminderSet) {
         this.isReminderSet = isReminderSet;
+    }
+
+    public String getReminderDate() {
+        return reminderDate;
+    }
+
+    public void setReminderDate(String reminderDate) {
+        this.reminderDate = reminderDate;
+    }
+
+    public String getReminderTime() {
+        return reminderTime;
+    }
+
+    public void setReminderTime(String reminderTime) {
+        this.reminderTime = reminderTime;
+    }
+
+    public String getAppointmentId() {
+        return appointmentId;
+    }
+
+    public void setAppointmentId(String appointmentId) {
+        this.appointmentId = appointmentId;
     }
 }

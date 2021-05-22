@@ -7,6 +7,9 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.media.MediaPlayer;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Build;
 
 import androidx.core.app.NotificationCompat;
@@ -17,7 +20,7 @@ import java.util.Date;
 import java.util.Random;
 
 public class AlarmReceiver extends BroadcastReceiver {
-    private String medicineName, day, time, instruction, otherInstruction, dosage, image, medicineId;
+    private String medicineName, day, time, instruction, otherInstruction, dosage, image, medicineId, userId;
     int id;
     Date endDate = new Date();
     Date currentDate = new Date();
@@ -43,7 +46,7 @@ public class AlarmReceiver extends BroadcastReceiver {
             System.out.println(intent.getIntExtra("randomId", randomId));
             id = intent.getIntExtra("randomId", randomId);
             endDate.setTime(intent.getLongExtra("endDate", -1));
-
+            userId = intent.getStringExtra("userId");
             System.out.println(endDate);
 
             //To cancel the repeating alarm after the end date is  crossed
@@ -58,6 +61,11 @@ public class AlarmReceiver extends BroadcastReceiver {
 
             //To show notification
             else{
+                Uri alarmSound =
+                        RingtoneManager. getDefaultUri (RingtoneManager. TYPE_NOTIFICATION );
+                MediaPlayer mp = MediaPlayer. create (context, alarmSound);
+                mp.start();
+
                 Intent intent_notification = new Intent(context.getApplicationContext(), AlarmDisplay.class);
                 intent_notification.putExtra("time", time);
                 intent_notification.putExtra("day", day);
@@ -70,6 +78,7 @@ public class AlarmReceiver extends BroadcastReceiver {
                 intent_notification.putExtra("currentDate", (new Date()).getTime());
                 intent_notification.putExtra("endDate", endDate.getTime());
                 intent_notification.putExtra("medicineId", medicineId);
+                intent_notification.putExtra("userId", userId);
                 PendingIntent pendingIntentNotification = PendingIntent.getActivity(context.getApplicationContext() , id, intent_notification, 0);
 
                 NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
@@ -79,7 +88,8 @@ public class AlarmReceiver extends BroadcastReceiver {
                         .setContentIntent(pendingIntentNotification)
                         .setOngoing(true)
                         .setAutoCancel(true)
-                        .setVisibility(NotificationCompat.VISIBILITY_PUBLIC);//to show content in lock screen
+                        .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)//to show content in lock screen
+                        .setPriority(NotificationCompat.PRIORITY_HIGH);
 
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)

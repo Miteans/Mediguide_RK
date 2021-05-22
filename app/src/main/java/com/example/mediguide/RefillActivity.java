@@ -1,42 +1,54 @@
 package com.example.mediguide;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.LinearLayout;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.mediguide.adapters.DeviceConnectAdapter;
 import com.example.mediguide.adapters.RefillAdapter;
 import com.example.mediguide.data.MedicineInformation;
+import com.google.android.material.appbar.MaterialToolbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
 
 public class RefillActivity extends AppCompatActivity {
-
+    MaterialToolbar mToolbar;
     RecyclerView recyclerView;
     ArrayList<String> arrayList = new ArrayList<>();
     DatabaseReference reference;
     ArrayList<MedicineInformation> retrieveMedDetails;
     RefillAdapter adapter;
+    LinearLayout layout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.refill_activity);
+
+        mToolbar = (MaterialToolbar) findViewById(R.id.topAppBar1);
+        mToolbar.setNavigationIcon(R.drawable.ic_baseline_arrow_back_24);
+        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(RefillActivity.this, HomeActivity.class);
+                startActivity(intent);
+                finish();
+            }
+        });
 
         reference = FirebaseDatabase.getInstance().getReference().child("MedicineInformation");
         FirebaseAuth mFirebaseAuth = FirebaseAuth.getInstance();
@@ -61,7 +73,6 @@ public class RefillActivity extends AppCompatActivity {
                             System.out.println("Hello11111111111111------------------------------------------------");
                         }
 
-
                         setUpMedicineCards();
                     }
                 }
@@ -78,7 +89,11 @@ public class RefillActivity extends AppCompatActivity {
             public void onCancelled(DatabaseError databaseError) {
             }
         });
+
+
     }
+
+
     private boolean checkActiveMed(int duration, String startDateString){
         Date currentDate = new Date();
         Date medDate = null;
@@ -104,8 +119,12 @@ public class RefillActivity extends AppCompatActivity {
     }
     private void setUpMedicineCards(){
         //Assign variable
-
+        System.out.println("setUpMedicineCards---------------------");
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setFocusable(false);
+
+        //   recyclerView.setFocusable(false);
         adapter = new RefillAdapter(this);
         recyclerView.setAdapter(adapter);
         adapter.setDataToRefillAdapter(retrieveMedDetails);
@@ -115,10 +134,18 @@ public class RefillActivity extends AppCompatActivity {
     }
 
     private void getData(DataSnapshot snapshot){
+        int med_count;
         MedicineInformation dummy = new MedicineInformation();
+        dummy.setMedicineId(snapshot.child("medicineId").getValue().toString());
         dummy.setMedicineName(snapshot.child("medicineName").getValue().toString());
         System.out.println(snapshot.child("medicineName").getValue().toString());
         dummy.setRefillCount(Integer.parseInt(snapshot.child("refillCount").getValue().toString()));
+        med_count=Integer.parseInt(snapshot.child("refillCount").getValue().toString());
+        System.out.println(med_count);
+
+//        if(med_count<=6){
+//                changecolor();
+//        }
 //        dummy.setEverydayMed((boolean) snapshot.child("everydayMed").getValue(Boolean.class));
 //        if (!dummy.getEverydayMed()) {
 //            dummy.setNoMedIntake(Integer.parseInt(snapshot.child("noMedIntake").getValue().toString()));
@@ -131,4 +158,16 @@ public class RefillActivity extends AppCompatActivity {
 
         retrieveMedDetails.add(dummy);
     }
+
+
+    public void  openRefillActivity(){
+        Intent intent = new Intent(this, RefillActivity.class);
+        startActivity(intent);
+        overridePendingTransition(0,0);
+    }
+
+//    private void changecolor() {
+//        layout = (LinearLayout) findViewById(R.id.layout1);
+//        layout.setBackground(@ColorInt);
+//    }
 }

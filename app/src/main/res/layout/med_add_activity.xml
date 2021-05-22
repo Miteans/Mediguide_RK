@@ -47,6 +47,7 @@
                 android:orientation="vertical"
                 android:layout_marginTop="20dp"
                 android:gravity="center"
+                android:visibility="gone"
                 android:id="@+id/fragment_1">
 
                 <!--Put form controls here-->
@@ -185,6 +186,37 @@
                 android:id="@+id/fragment_2">
 
                 <!--Put form controls here-->
+
+                <TextView
+                    android:id="@+id/notification"
+                    android:layout_width="wrap_content"
+                    android:layout_height="30dp"
+                    android:text="How to notify the medicine reminder ?"
+                    android:textSize="20sp" />
+
+                <RadioGroup
+                    android:id="@+id/notif_radioGroup"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="15dp"
+                    android:layout_marginLeft="30dp"
+                    android:layout_marginBottom="20dp"
+                    android:checkedButton="@+id/notif_button_1"
+                    android:orientation="horizontal"
+                    >
+                    <RadioButton
+                        android:id="@+id/notif_button_1"
+                        android:layout_width="150dp"
+                        android:layout_height="match_parent"
+                        android:text="Smart Phone"
+                        />
+
+                    <RadioButton
+                        android:id="@+id/notif_button_2"
+                        android:layout_width="150dp"
+                        android:layout_height="match_parent"
+                        android:text="Smart Watch" />
+                </RadioGroup>
 
                 <com.google.android.material.textfield.TextInputLayout
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
@@ -381,10 +413,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="30dp"
                         android:layout_gravity="end"
-                        android:text="Save"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:foreground="@drawable/custom_ripple_effect"/>
+                        android:text="Save" />
 
                 </LinearLayout>
 

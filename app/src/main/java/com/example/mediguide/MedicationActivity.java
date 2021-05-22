@@ -111,6 +111,7 @@ public class MedicationActivity extends AppCompatActivity {
                     retrieveMedDetails = new ArrayList<MedicineInformation>();
                     for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                         MedicineInformation dummy = new MedicineInformation();
+                        dummy.setMedicineId(snapshot.child("medicineId").getValue().toString());
                         dummy.setMedicineName(snapshot.child("medicineName").getValue().toString());
                         dummy.setFormOfMedicine(snapshot.child("formOfMedicine").getValue().toString());
                         dummy.setDosage(Integer.parseInt(snapshot.child("dosage").getValue().toString()));
@@ -136,7 +137,6 @@ public class MedicationActivity extends AppCompatActivity {
 
                         retrieveMedDetails.add(dummy);
                         setUpMedicineCards();
-                        printData(retrieveMedDetails);
                     }
                 }
                 //No medicine detail is found
@@ -185,12 +185,6 @@ public class MedicationActivity extends AppCompatActivity {
     private void openMedAddPageOneActivity(){
         Intent intent = new Intent(this, MedAddActivity.class);
         startActivity(intent);
-    }
-
-    private void printData(ArrayList<MedicineInformation> datas){
-        for(MedicineInformation data: datas){
-            System.out.println(data.getMedicineName());
-        }
     }
 
     public void openHomeActivity(){

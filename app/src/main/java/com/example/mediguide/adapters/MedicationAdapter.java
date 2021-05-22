@@ -1,18 +1,33 @@
 package com.example.mediguide.adapters;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.mediguide.R;
 import com.example.mediguide.data.MedicineInformation;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.ramotion.foldingcell.FoldingCell;
 import com.squareup.picasso.Picasso;
 
@@ -57,7 +72,6 @@ public class MedicationAdapter extends RecyclerView.Adapter<MedicationAdapter.Me
         else
             holder.instruction.setText(medicine.getInstruction());
         holder.instructionTitle.setText(medicine.getInstruction());
-        //holder.refillCount.setText(medicine.getRefillCount());
 
         if(medicine.getEverydayMed())
             holder.isEverydayMedGrp.setText("Yes");
@@ -89,6 +103,76 @@ public class MedicationAdapter extends RecyclerView.Adapter<MedicationAdapter.Me
                 holder.foldingCell.toggle(true);
             }
         });
+
+        holder.deleteMed.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                builder.setTitle("Confirm");
+                builder.setMessage("Are you sure to delete this medicine ?")
+                        .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                FirebaseStorage firebaseStorage = FirebaseStorage.getInstance();
+                                StorageReference storageReference = firebaseStorage.getReferenceFromUrl(medicine.getImageUrl());
+                                DatabaseReference reference = FirebaseDatabase.getInstance().getReference().child("MedicineInformation");
+                                FirebaseAuth mFirebaseAuth = FirebaseAuth.getInstance();
+                                FirebaseUser mFirebaseUser = mFirebaseAuth.getCurrentUser();
+                                DatabaseReference reportReference = FirebaseDatabase.getInstance().getReference().child("MedicationReport");
+
+                                reference.orderByChild("userId").equalTo(mFirebaseUser.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(DataSnapshot dataSnapshot) {
+                                        if (dataSnapshot.exists()) {
+                                            for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                                                if(snapshot.child("medicineId").getValue().toString().equals(medicine.getMedicineId())){
+                                                    storageReference.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                        @Override
+                                                        public void onSuccess(Void aVoid) {
+                                                            // File deleted successfully
+                                                            snapshot.getRef().removeValue();
+                                                            reportReference.orderByChild("userId").equalTo(mFirebaseUser.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+                                                                @Override
+                                                                public void onDataChange(DataSnapshot reportDataSnapshot) {
+                                                                    if (reportDataSnapshot.exists()) {
+                                                                        for (DataSnapshot reportSnapshot : reportDataSnapshot.getChildren()) {
+                                                                            if (reportSnapshot.child("medicineId").getValue().toString().equals(medicine.getMedicineId())) {
+                                                                                reportSnapshot.getRef().removeValue();
+                                                                                medicines.remove(position);
+                                                                                notifyDataSetChanged();
+                                                                                Toast.makeText(context, "Deleted Successfully", Toast.LENGTH_LONG).show();
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                                @Override
+                                                                public void onCancelled(DatabaseError databaseError) {
+                                                                }
+                                                            });
+                                                        }
+                                                    }).addOnFailureListener(new OnFailureListener() {
+                                                        @Override
+                                                        public void onFailure(@NonNull Exception exception) {
+                                                            // Uh-oh, an error occurred!
+                                                            Toast.makeText(context, "Something went wrong please try again....", Toast.LENGTH_LONG).show();
+                                                        }
+                                                    });
+                                                }
+                                            }
+                                        }
+                                    }
+                                    @Override
+                                    public void onCancelled(DatabaseError databaseError) {
+                                    }
+                                });
+                            }
+                        })
+                        .setNegativeButton("Cancel",null);
+
+                builder.show();
+
+            }
+        });
     }
 
     @Override
@@ -108,9 +192,10 @@ public class MedicationAdapter extends RecyclerView.Adapter<MedicationAdapter.Me
 
     public class MedicineViewHolder extends RecyclerView.ViewHolder{
         private FoldingCell foldingCell;
-        private TextView medicineName, medicineNameTitle, reasonForIntake, dosage,frequencyOfMedIntake, refillCount, medNum;
+        private TextView medicineName, medicineNameTitle, reasonForIntake, dosage,frequencyOfMedIntake, medNum;
         private TextView setStartDate, dosageTitle, instructionTitle, duration, otherInstruction, formOfMedicine, instruction, isEverydayMedGrp;
         private ImageView imageView;
+        private ImageButton deleteMed;
         private LinearLayout intakeTimes;
 
         public MedicineViewHolder(@NonNull View medicineView){
@@ -128,12 +213,12 @@ public class MedicationAdapter extends RecyclerView.Adapter<MedicationAdapter.Me
             formOfMedicine = medicineView.findViewById(R.id.formOfMedicine);
             instructionTitle = medicineView.findViewById(R.id.instructionMedTitle);
             isEverydayMedGrp = medicineView.findViewById(R.id.isEverydayMed);
-            //refillCount = medicineView.findViewById(R.id.refillCountMed);
             imageView = medicineView.findViewById(R.id.imageView);
             medicineName = medicineView.findViewById(R.id.medicineName);
             dosage = medicineView.findViewById(R.id.dosageMed);
             instruction = medicineView.findViewById(R.id.instructionMed);
             intakeTimes = medicineView.findViewById(R.id.intakeTimes);
+            deleteMed = medicineView.findViewById(R.id.deleteMed);
 
         }
     }

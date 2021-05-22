@@ -11,7 +11,9 @@ import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.DatePicker;
+import android.widget.LinearLayout;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
@@ -32,15 +34,15 @@ import com.google.firebase.database.FirebaseDatabase;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Locale;
 import java.util.Random;
 
 public class AppointmentForm extends Activity {
-    TextInputEditText title, hospital, doctor, appointment_date, appointment_time;
+    TextInputEditText title, hospital, doctor, appointment_date, appointment_time, reminder_time, reminder_date;
     Button appointment_form;
     boolean isTitleValid, isDateValid, isTimeValid;
     DatePickerDialog picker;
     SwitchMaterial set_reminder;
+    LinearLayout reminderLayout;
 
     DatabaseReference reference;
     Appointment appointment;
@@ -57,6 +59,10 @@ public class AppointmentForm extends Activity {
         appointment_date = (TextInputEditText) findViewById(R.id.date_text);
         appointment_time = (TextInputEditText) findViewById(R.id.time_text);
         appointment_form = (Button) findViewById(R.id.apt_btn);
+        reminderLayout = (LinearLayout) findViewById(R.id.reminderLayout);
+        set_reminder = (SwitchMaterial) findViewById(R.id.set_reminder);
+        reminder_date = findViewById(R.id.reminder_date_text);
+        reminder_time = findViewById(R.id.reminder_time_text);
 
         appointment = new Appointment();
         reference = FirebaseDatabase.getInstance().getReference().child("Appointment");
@@ -80,15 +86,19 @@ public class AppointmentForm extends Activity {
                     String doctor_name = doctor.getText().toString();
                     String appointmentDate = appointment_date.getText().toString();
                     String appointmentTime = appointment_time.getText().toString();
-                    set_reminder = (SwitchMaterial) findViewById(R.id.set_reminder);
 
+                    appointment.setAppointmentId(title_name + " " + String.valueOf((new Date()).getTime()));
                     appointment.setAppointment_title(title_name);
                     appointment.setHospital_name(hospital_name);
                     appointment.setDoctor_name(doctor_name);
                     appointment.setDate(appointmentDate);
                     appointment.setTime(appointmentTime);
-                    if(set_reminder.isChecked())
+                    if(set_reminder.isChecked()){
                         appointment.setIsReminderSet(true);
+                        appointment.setReminderDate(reminder_date.getText().toString());
+                        appointment.setReminderTime(reminder_time.getText().toString());
+                        setAppointmentReminder(appointment.getReminderDate(), appointment.getReminderTime(), appointment.getTime(), appointment.getDate());
+                    }
                     else
                         appointment.setIsReminderSet(false);
 
@@ -99,13 +109,19 @@ public class AppointmentForm extends Activity {
 
                     reference.push().setValue(appointment);
 
-                    if(appointment.getIsReminderSet())
-                        setAppointmentReminder(appointment.getDate(), appointment.getTime());
-
                     nDialog.dismiss();
                     Toast.makeText(AppointmentForm.this, "Saved successfully", Toast.LENGTH_LONG).show();
                     clearForm();
                 }
+            }
+        });
+
+        set_reminder.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked)
+                    reminderLayout.setVisibility(View.VISIBLE);
+                else
+                    reminderLayout.setVisibility(View.GONE);
             }
         });
 
@@ -159,6 +175,64 @@ public class AppointmentForm extends Activity {
             }
         });
 
+        reminder_date.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final Calendar cldr = Calendar.getInstance();
+                int day = cldr.get(Calendar.DAY_OF_MONTH);
+                int month = cldr.get(Calendar.MONTH);
+                int year = cldr.get(Calendar.YEAR);
+                // date picker dialog
+                picker = new DatePickerDialog(AppointmentForm.this,
+                        new DatePickerDialog.OnDateSetListener() {
+                            @Override
+                            public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+                                reminder_date.setText(dayOfMonth + "/" + (monthOfYear + 1) + "/" + year);
+                            }
+                        }, year, month, day);
+                picker.show();
+            }
+        });
+
+        reminder_time.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // TODO Auto-generated method stub
+                Calendar mcurrentTime = Calendar.getInstance();
+                int hour = mcurrentTime.get(Calendar.HOUR_OF_DAY);
+                int minute = mcurrentTime.get(Calendar.MINUTE);
+                TimePickerDialog mTimePicker;
+                mTimePicker = new TimePickerDialog(AppointmentForm.this, new TimePickerDialog.OnTimeSetListener() {
+                    @Override
+                    public void onTimeSet(TimePicker timePicker, int selectedHour, int selectedMinute) {
+                        reminder_time.setText(String.format("%02d:%02d", selectedHour, selectedMinute));
+
+                    }
+                }, hour, minute, false);//Yes 24 hour time
+                mTimePicker.setTitle("Select Time");
+                mTimePicker.show();
+            }
+        });
+
+        // Update appointment card operation
+        Intent intent = getIntent();
+        String intent_title = intent.getStringExtra("TITLE");
+        String intent_hospital = intent.getStringExtra("HOSPITAL");
+        String intent_doctor = intent.getStringExtra("DOCTOR");
+        String intent_date = intent.getStringExtra("DATE");
+        String intent_time = intent.getStringExtra("TIME");
+        boolean is_reminder_set = intent.getBooleanExtra("IS_REMINDER_SET",true);
+        String rem_date = intent.getStringExtra("REM_DATE");
+        String rem_time = intent.getStringExtra("REM_TIME");
+
+        title.setText(intent_title);
+        hospital.setText(intent_hospital);
+        doctor.setText(intent_doctor);
+        appointment_date.setText(intent_date);
+        appointment_time.setText(intent_time);
+        reminder_date.setText(rem_date);
+        reminder_date.setText(rem_time);
+
     }
 
     public Boolean SetValidation() {
@@ -198,10 +272,9 @@ public class AppointmentForm extends Activity {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
-    private void setAppointmentReminder(String dateString, String timeString){
+    private void setAppointmentReminder(String reminderDateString, String reminderTimeString, String appointmentTimeString, String appointmentDateString){
         Random random = new Random();
         int randomId1, randomId2;
-        Date currentDate = new Date();
 
         randomId1 = random.nextInt();
         randomId2 = random.nextInt();
@@ -211,60 +284,61 @@ public class AppointmentForm extends Activity {
             randomId2 = random.nextInt();
         }
 
-        Date reminderDate;
-        String[] times = timeString.split(":");
-        Date previousDay;
-        Calendar prevCalendar = Calendar.getInstance();
-        Calendar currCalendar = Calendar.getInstance();
+        Date reminderDate = null, appointmentDate = null;
+        String[] reminderTime = reminderTimeString.split(":");
+        String[] appointmentTime = appointmentTimeString.split(":");
+
+        Calendar remCalender = Calendar.getInstance();
+        Calendar appointmentCalender = Calendar.getInstance();
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
 
         try{
-            reminderDate = dateFormat.parse(dateString);
-            previousDay = new Date(reminderDate.getTime() - 1);
+            reminderDate = dateFormat.parse(reminderDateString);
+            appointmentDate = dateFormat.parse(appointmentDateString);
         }
-        catch (Exception e){
-            reminderDate = null;
-            previousDay = null;
-        }
+        catch (Exception e){ }
 
-        prevCalendar.setTime(previousDay);
-        currCalendar.setTime(reminderDate);
+        //setting timings and dates to the calendars
+        remCalender.setTime(reminderDate);
+        appointmentCalender.setTime(appointmentDate);
+        remCalender.set(Calendar.HOUR_OF_DAY, Integer.parseInt(String.valueOf(reminderTime[0])));
+        remCalender.set(Calendar.MINUTE, Integer.parseInt(String.valueOf(reminderTime[1])));
+        appointmentCalender.set(Calendar.HOUR_OF_DAY, (Integer.parseInt(String.valueOf(appointmentTime[0])) - 1));
+        appointmentCalender.set(Calendar.MINUTE, Integer.parseInt(String.valueOf(appointmentTime[1])));
 
-        prevCalendar.set(Calendar.HOUR_OF_DAY, Integer.parseInt(String.valueOf(times[0])));
-        prevCalendar.set(Calendar.MINUTE, Integer.parseInt(String.valueOf(times[1])));
+        System.out.println(remCalender.getTime());
+        System.out.println(appointmentCalender.getTime());
 
-        currCalendar.set(Calendar.HOUR_OF_DAY, (Integer.parseInt(String.valueOf(times[0])) - 4));
-        currCalendar.set(Calendar.MINUTE, Integer.parseInt(String.valueOf(times[1])));
+        FirebaseUser currentFirebaseUser = FirebaseAuth.getInstance().getCurrentUser() ;
+        String userId = currentFirebaseUser.getUid();
 
-        if(prevCalendar.getTime().compareTo(currentDate) < 0) {
-            Intent previousDayIntent = new Intent(this, AppointmentNotification.class);
-            previousDayIntent.putExtra("appointmentName", appointment.getAppointment_title());
-            previousDayIntent.putExtra("hospitalName", String.valueOf(appointment.getHospital_name()));
-            previousDayIntent.putExtra("day", String.valueOf(prevCalendar.getDisplayName(Calendar.DAY_OF_WEEK, Calendar.LONG, Locale.ENGLISH)));
-            previousDayIntent.putExtra("time", timeString);
-            previousDayIntent.putExtra("randomId", randomId1);
-            PendingIntent prevPendingIntent = PendingIntent.getBroadcast(this, randomId1, previousDayIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        //Providing reminder on reminder date
+        Intent reminderIntent = new Intent(this, AppointmentNotification.class);
+        reminderIntent.putExtra("appointmentName", appointment.getAppointment_title());
+        reminderIntent.putExtra("hospitalName", String.valueOf(appointment.getHospital_name()));
+        reminderIntent.putExtra("isRemind", "Yes");
+        reminderIntent.putExtra("date", appointmentDateString);
+        reminderIntent.putExtra("time",appointmentTimeString);
+        reminderIntent.putExtra("randomId", randomId1);
+        PendingIntent reminderPendingIntent = PendingIntent.getBroadcast(this, randomId1, reminderIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-            AlarmManager prevAlarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
-            long prevCalendarTimeInMillis = prevCalendar.getTimeInMillis();
-            System.out.println(prevCalendarTimeInMillis);
-            prevAlarmManager.set(AlarmManager.RTC_WAKEUP, prevCalendarTimeInMillis, prevPendingIntent);
-        }
+        AlarmManager reminderAlarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+        long remCalendarTimeInMillis = remCalender.getTimeInMillis();
+        System.out.println(remCalendarTimeInMillis);
+        reminderAlarmManager.set(AlarmManager.RTC_WAKEUP, remCalendarTimeInMillis, reminderPendingIntent);
 
-        if(currCalendar.getTime().compareTo(currentDate) <= 0) {
-            Intent currentDayIntent = new Intent(this, AppointmentNotification.class);
-            currentDayIntent.putExtra("appointmentName", appointment.getAppointment_title());
-            currentDayIntent.putExtra("hospitalName", String.valueOf(appointment.getHospital_name()));
-            currentDayIntent.putExtra("day", String.valueOf(currCalendar.getDisplayName(Calendar.DAY_OF_WEEK, Calendar.LONG, Locale.ENGLISH)));
-            currentDayIntent.putExtra("time", timeString);
-            currentDayIntent.putExtra("randomId", randomId2);
-            PendingIntent currentPendingIntent = PendingIntent.getBroadcast(this, randomId2, currentDayIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        //Providing reminder 1 hour before the appointment
+        Intent appointmentDayIntent = new Intent(this, AppointmentNotification.class);
+        appointmentDayIntent.putExtra("appointmentName", appointment.getAppointment_title());
+        appointmentDayIntent.putExtra("hospitalName", String.valueOf(appointment.getHospital_name()));
+        appointmentDayIntent.putExtra("isRemind", "No");
+        appointmentDayIntent.putExtra("randomId", randomId2);
+        PendingIntent appointmentPendingIntent = PendingIntent.getBroadcast(this, randomId2, appointmentDayIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-            AlarmManager currAlarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
-            long currentCalendarTimeMillis = currCalendar.getTimeInMillis();
-            System.out.println(currentCalendarTimeMillis);
-            currAlarmManager.set(AlarmManager.RTC_WAKEUP, currentCalendarTimeMillis, currentPendingIntent);
-        }
+        AlarmManager appointmentAlarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+        long appointmentCalendarTimeMillis = appointmentCalender.getTimeInMillis();
+        System.out.println(appointmentCalendarTimeMillis);
+        appointmentAlarmManager.set(AlarmManager.RTC_WAKEUP, appointmentCalendarTimeMillis, appointmentPendingIntent);
 
     }
 

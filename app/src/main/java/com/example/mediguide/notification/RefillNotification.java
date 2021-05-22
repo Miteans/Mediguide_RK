@@ -7,6 +7,9 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.media.MediaPlayer;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Build;
 
 import androidx.core.app.NotificationCompat;
@@ -34,12 +37,19 @@ public class RefillNotification extends BroadcastReceiver {
         }
 
         //To show notification
+        Uri alarmSound =
+                RingtoneManager. getDefaultUri (RingtoneManager. TYPE_NOTIFICATION );
+        MediaPlayer mp = MediaPlayer. create (context, alarmSound);
+        mp.start();
+
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
                 .setSmallIcon(R.drawable.ic_baseline_access_alarm_24)
                 .setContentTitle("Refill Notification")
-                .setContentText(message)
+                .setStyle(new NotificationCompat.BigTextStyle().bigText(message))
                 .setAutoCancel(true)
-                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC);//to show content in lock screen
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)//to show content in lock screen
+                .setPriority(NotificationCompat.PRIORITY_HIGH);
+
 
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)

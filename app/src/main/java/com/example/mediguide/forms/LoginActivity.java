@@ -1,6 +1,8 @@
 package com.example.mediguide.forms;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
@@ -17,17 +19,17 @@ import androidx.annotation.RequiresApi;
 import com.example.mediguide.HomeActivity;
 import com.example.mediguide.R;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 
 public class LoginActivity extends Activity {
-    TextView link;
+    TextView link,forgotTextLink;
     EditText email, password;
     Button login;
     FirebaseAuth mFirebaseAuth;
-    /*Intent mServiceIntent;
-    private DatabaseConnectBg mSensorService;*/
 
     boolean isEmailValid, isPasswordValid;
     @Override
@@ -36,6 +38,46 @@ public class LoginActivity extends Activity {
         setContentView(R.layout.login_activity);
 
         mFirebaseAuth = FirebaseAuth.getInstance();
+
+        forgotTextLink =  (TextView) findViewById(R.id.forgotPassword);
+        forgotTextLink.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){
+                EditText resetMail = new EditText(v.getContext());
+                AlertDialog.Builder passwordResetDialog = new AlertDialog.Builder(v.getContext());
+                passwordResetDialog.setTitle("Forgot Password ?");
+                passwordResetDialog.setMessage("Enter your mail to receive reset link");
+                passwordResetDialog.setView(resetMail);
+
+                passwordResetDialog.setPositiveButton("Yes", new DialogInterface.OnClickListener(){
+                    @Override
+                    public void onClick(DialogInterface dialog,int which){
+                        //extract the email and send the reset link
+                        String mail = resetMail.getText().toString();
+                        mFirebaseAuth.sendPasswordResetEmail(mail).addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void aVoid) {
+                                Toast.makeText(LoginActivity.this,"Reset Link Sent to Your Email",Toast.LENGTH_SHORT).show();
+
+
+                            }
+                        }).addOnFailureListener(new OnFailureListener(){
+                            @Override
+                            public void onFailure(@NonNull Exception e){
+                                Toast.makeText(LoginActivity.this,"Error! Reset Link is not sent" + e.getMessage(),Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    }
+                });
+                passwordResetDialog.setNegativeButton("No", new DialogInterface.OnClickListener(){
+                    @Override
+                    public void onClick(DialogInterface dialog,int which){
+
+                    }
+                });
+                passwordResetDialog.create().show();
+            }
+        });
 
         link = (TextView) findViewById(R.id.gotoRegister);
         link.setOnClickListener(new View.OnClickListener() {
@@ -95,7 +137,7 @@ public class LoginActivity extends Activity {
             password.setError(getResources().getString(R.string.password_error));
             isPasswordValid = false;
         } else if (password.getText().length() < 6) {
-            password.setError("Please enter a password of minimum 6 characters");
+            password.setError(getResources().getString(R.string.error_invalid_password));
             isPasswordValid = false;
         } else  {
             isPasswordValid = true;
@@ -109,4 +151,6 @@ public class LoginActivity extends Activity {
         }
 
     }
+
+
 }

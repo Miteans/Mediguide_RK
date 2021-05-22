@@ -2,6 +2,7 @@ package com.example.mediguide.forms;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -10,6 +11,7 @@ import android.util.Patterns;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 
 import com.example.mediguide.HomeActivity;
 import com.example.mediguide.R;
@@ -19,8 +21,11 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 public class SignUpActivity extends Activity{
     EditText name, email, phone, password, confirm_password;
@@ -28,8 +33,8 @@ public class SignUpActivity extends Activity{
     boolean isNameValid, isEmailValid, isPhoneValid, isPasswordValid, isConfirmPasswordValid;
     DatabaseReference reference;
     User user;
-    long maxid = 0;
     FirebaseAuth mFirebaseAuth;
+    DatabaseReference userReference;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,7 +51,7 @@ public class SignUpActivity extends Activity{
         register = (Button) findViewById(R.id.btnLogin);
         user = new User();
         reference = FirebaseDatabase.getInstance().getReference().child("User");
-
+        userReference = FirebaseDatabase.getInstance().getReference().child("User");
 
         register.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -58,34 +63,25 @@ public class SignUpActivity extends Activity{
                     Long userPhone = Long.parseLong((phone.getText().toString().trim()));
                     String userPassword = password.getText().toString();
 
-                    //storing in authentication
-                    mFirebaseAuth.createUserWithEmailAndPassword(userEmail,userPassword).addOnCompleteListener(SignUpActivity.this, new OnCompleteListener<AuthResult>() {
+                    userReference.orderByChild("email").equalTo(userEmail).addListenerForSingleValueEvent(new ValueEventListener() {
+                        @RequiresApi(api = Build.VERSION_CODES.O)
                         @Override
-                        public void onComplete(@NonNull Task<AuthResult> task) {
-                            if(!task.isSuccessful()){
-                                Toast.makeText(SignUpActivity.this, "Registration Unsuccessful", Toast.LENGTH_LONG).show();
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            if (dataSnapshot.exists()) {
+                                Toast.makeText(SignUpActivity.this, "Email Id already exists", Toast.LENGTH_LONG).show();
                             }
                             else{
-                                FirebaseUser currentFirebaseUser = FirebaseAuth.getInstance().getCurrentUser() ;
-                                String userId = currentFirebaseUser.getUid();
-
-                                //storing data in Real Time DB
-                                user.setName(userName);
-                                user.setEmail(userEmail);
-                                user.setPhoneNumber(userPhone);
-                                user.setPassword(userPassword);
-                                user.setUserId(userId);
-                                reference.push().setValue(user);
-
-                                startActivity(new Intent(SignUpActivity.this, HomeActivity.class));
-
-                                finish();
-                                Toast.makeText(SignUpActivity.this, "Registered successfully", Toast.LENGTH_LONG).show();
+                                setUser(userEmail, userPassword, userName, userPhone);
                             }
+                        }
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
                         }
                     });
 
                 }
+
             }
         });
     }
@@ -146,5 +142,33 @@ public class SignUpActivity extends Activity{
             return true;
         }
         return false;
+    }
+
+    private void setUser(String userEmail, String userPassword, String userName, Long userPhone){
+        //storing in authentication
+        mFirebaseAuth.createUserWithEmailAndPassword(userEmail,userPassword).addOnCompleteListener(SignUpActivity.this, new OnCompleteListener<AuthResult>() {
+            @Override
+            public void onComplete(@NonNull Task<AuthResult> task) {
+                if(!task.isSuccessful()){
+                    Toast.makeText(SignUpActivity.this, "Registration Unsuccessful", Toast.LENGTH_LONG).show();
+                }
+                else{
+                    FirebaseUser currentFirebaseUser = FirebaseAuth.getInstance().getCurrentUser() ;
+                    String userId = currentFirebaseUser.getUid();
+
+                    //storing data in Real Time DB
+                    user.setName(userName);
+                    user.setEmail(userEmail);
+                    user.setPhoneNumber(userPhone);
+                    user.setPassword(userPassword);
+                    user.setUserId(userId);
+                    reference.push().setValue(user);
+
+                    startActivity(new Intent(SignUpActivity.this, HomeActivity.class));
+                    Toast.makeText(SignUpActivity.this, "Registered successfully", Toast.LENGTH_LONG).show();
+                    finish();
+                }
+            }
+        });
     }
 }

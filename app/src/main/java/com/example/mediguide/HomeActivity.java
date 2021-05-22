@@ -171,7 +171,7 @@ public class HomeActivity extends AppCompatActivity {
                 return true;
             case R.id.refill:
                 //add the function to perform here
-                openRefillActivity();
+                openConnectActivity();
                 return true;
             case R.id.report:
                 //add the function to perform here
@@ -223,12 +223,6 @@ public class HomeActivity extends AppCompatActivity {
 
     public void openSettingsActivity(){
         Intent intent = new Intent(this, SettingsActivity.class);
-        startActivity(intent);
-        overridePendingTransition(0,0);
-    }
-
-    public void  openRefillActivity(){
-        Intent intent = new Intent(this, RefillActivity.class);
         startActivity(intent);
         overridePendingTransition(0,0);
     }
@@ -336,15 +330,17 @@ public class HomeActivity extends AppCompatActivity {
                     retrieveMedDetails = new ArrayList<MedicineInformation>();
                     for(DataSnapshot snapshot : dataSnapshot.getChildren() ){
                         //Daily Medication
-                        if(snapshot.child("everydayMed").getValue(Boolean.class)){
-                            if(checkTheDate(snapshot.child("setStartDate").getValue().toString(), snapshot.child("duration").getValue().toString(), currentDate)){
-                                retrieveDataFromDatabase(snapshot);
+                        if(snapshot.child("modeOfNotification").getValue().toString().equals("Smart Phone")) {
+                            if (snapshot.child("everydayMed").getValue(Boolean.class)) {
+                                if (checkTheDate(snapshot.child("setStartDate").getValue().toString(), snapshot.child("duration").getValue().toString(), currentDate)) {
+                                    retrieveDataFromDatabase(snapshot);
+                                }
                             }
-                        }
-                        //Not a daily Medication
-                        else{
-                            if(checkNoDate(snapshot, currentDate)){
-                                retrieveDataFromDatabase(snapshot);
+                            //Not a daily Medication
+                            else {
+                                if (checkNoDate(snapshot, currentDate)) {
+                                    retrieveDataFromDatabase(snapshot);
+                                }
                             }
                         }
                     }

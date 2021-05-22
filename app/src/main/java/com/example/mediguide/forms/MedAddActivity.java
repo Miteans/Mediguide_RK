@@ -72,7 +72,6 @@ public class MedAddActivity extends AppCompatActivity {
     View view1, view2, view3;
     LinearLayout fragmentOne, fragmentTwo, fragmentThree;
     int intakeIndex;
-    String ChannelId;
     int randomId;
 
     Button backToFirstFragment, goToSecondFragment, goToThirdFragment, backToSecondFragment, camera, saveMedInfo;
@@ -82,10 +81,10 @@ public class MedAddActivity extends AppCompatActivity {
     TextInputEditText medicineName, reasonForIntake, dosage, noMedIntakeText;
     TextInputEditText frequencyOfMedIntake, intakeTimes[], setStartDate, duration, otherInstruction,  refillCount;
     AutoCompleteTextView formOfMedicine, instruction;
-    RadioGroup isEverydayMedGrp;
+    RadioGroup isEverydayMedGrp, notificationGroup;
 
     boolean isEverydayMedValue;
-    String selectedFormOfMedicine, selectedInstruction, imageId;
+    String selectedFormOfMedicine, selectedInstruction, imageId, notificationModeValue = "Smart Phone";
 
     MedicineInformation medicineInformation;
     DatabaseReference reference;
@@ -157,6 +156,21 @@ public class MedAddActivity extends AppCompatActivity {
                 selectedInstruction = (String) adapterView.getItemAtPosition(i);
             }
         });
+
+        notificationGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener()
+        {
+            public void onCheckedChanged(RadioGroup group, int checkedId)
+            {
+                RadioButton checkedRadioButton = (RadioButton)group.findViewById(checkedId);
+                boolean isChecked = checkedRadioButton.isChecked();
+                // If the radiobutton that has changed in check state is now checked...
+                if (isChecked)
+                {
+                    notificationModeValue = checkedRadioButton.getText().toString();
+                }
+            }
+        });
+
 
         //Dynamic Input
         TextWatcher watcher= new TextWatcher() {
@@ -283,6 +297,7 @@ public class MedAddActivity extends AppCompatActivity {
                         medicineInformation.setNoMedIntake(Integer.parseInt(noMedIntakeText.getText().toString()));
                     }
                     medicineInformation.setEverydayMed(isEverydayMedValue);
+                    medicineInformation.setModeOfNotification(notificationModeValue);
 
                     medicineInformation.setFrequencyOfMedIntake(Integer.parseInt(frequencyOfMedIntake.getText().toString()));
 
@@ -339,7 +354,8 @@ public class MedAddActivity extends AppCompatActivity {
 
                                 //Adding data to database
                                 reference.push().setValue(medicineInformation);
-                                setReminder();
+                                if(medicineInformation.getModeOfNotification().equals("Smart Phone"))
+                                    setReminder();
 
                                 nDialog.dismiss();
                                 //Confirmation and clearing the form
@@ -436,6 +452,7 @@ public class MedAddActivity extends AppCompatActivity {
         refillCount = (TextInputEditText) findViewById(R.id.refillCount);
         instruction = (AutoCompleteTextView) findViewById(R.id.set_instruction);
         otherInstruction = (TextInputEditText) findViewById(R.id.otherInstruction);
+        notificationGroup = (RadioGroup) findViewById(R.id.notif_radioGroup);
         saveMedInfo = (Button) findViewById(R.id.save_btn);
 
         //Setting the int type
@@ -464,7 +481,7 @@ public class MedAddActivity extends AppCompatActivity {
     public boolean setValidation(){
 
         boolean isNameValid, isFormOfMedicineValid, isDosageValid, isFreqValid, isDateValid;
-        boolean isDurationValid, isTimeValid = true, isImageValid, isNoMedIntake = true;
+        boolean isDurationValid, isTimeValid = true, isImageValid, isNoMedIntake = true, isNotificationEmpty;
 
         if (medicineName.getText().toString().isEmpty()) {
             medicineName.setError(getResources().getString(R.string.required));
@@ -655,6 +672,8 @@ public class MedAddActivity extends AppCompatActivity {
         Calendar calendar = Calendar.getInstance();
         Calendar getDuration = Calendar.getInstance();
         SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
+        FirebaseUser currentFirebaseUser = FirebaseAuth.getInstance().getCurrentUser() ;
+        String userId = currentFirebaseUser.getUid();
 
         try{
             setDate = format.parse(medicineInformation.getSetStartDate());
@@ -694,6 +713,7 @@ public class MedAddActivity extends AppCompatActivity {
             intent.putExtra("time", time);
             intent.putExtra("randomId", randomId);
             intent.putExtra("endDate", endDate.getTime());
+            intent.putExtra("userId", userId);
             PendingIntent pendingIntent = PendingIntent.getBroadcast(MedAddActivity.this, randomId, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
             AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
